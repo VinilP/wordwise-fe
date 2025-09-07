@@ -21,25 +21,33 @@ A modern, responsive React application for the WordWise book review platform bui
 - npm or yarn
 - Backend API running (see backend README)
 
-## 🛠️ Installation
+## 🛠️ Quick Start - Development Environment
 
-1. **Clone the repository**
+### Prerequisites
+- **Node.js** (v18 or higher) - [Download here](https://nodejs.org/)
+- **Backend API** running on `http://localhost:3001` (see backend README)
+- **npm** or **yarn** package manager
+
+### Step-by-Step Setup
+
+1. **Clone and Navigate**
    ```bash
    git clone <repository-url>
-   cd WordWise/frontend
+   cd wordwise-fe
    ```
 
-2. **Install dependencies**
+2. **Install Dependencies**
    ```bash
    npm install
    ```
 
-3. **Environment Setup**
+3. **Environment Configuration**
    ```bash
+   # Copy the example environment file
    cp .env.example .env
    ```
    
-   Configure the following environment variables in `.env`:
+   Edit the `.env` file with your configuration:
    ```env
    # API Configuration
    VITE_API_BASE_URL=http://localhost:3001/api
@@ -51,12 +59,71 @@ A modern, responsive React application for the WordWise book review platform bui
    VITE_ENABLE_DEBUG=true
    ```
 
-4. **Start the development server**
+4. **Start Development Server**
    ```bash
    npm run dev
    ```
 
-The application will be available at `http://localhost:5173`
+5. **Access the Application**
+   - Frontend: `http://localhost:5173`
+   - Backend API: `http://localhost:3001` (must be running)
+
+### 🚨 Important Notes
+
+- **Backend Required**: Make sure the backend API is running before starting the frontend
+- **Port 5173**: Vite uses port 5173 by default for development
+- **Hot Reload**: Changes will automatically reload in the browser
+- **Environment Variables**: All Vite environment variables must start with `VITE_`
+
+### 🔧 Development Commands
+
+```bash
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Run tests
+npm run test
+
+# Run linting
+npm run lint
+
+# Format code
+npm run format
+```
+
+## 🚀 Running Full Development Environment
+
+To run both frontend and backend together:
+
+### Terminal 1 - Backend
+```bash
+cd wordwise-be
+npm run dev
+# Backend will run on http://localhost:3001
+```
+
+### Terminal 2 - Frontend
+```bash
+cd wordwise-fe
+npm run dev
+# Frontend will run on http://localhost:5173
+```
+
+### Quick Verification
+1. **Backend Health Check**: Visit `http://localhost:3001/health`
+2. **Frontend Application**: Visit `http://localhost:5173`
+3. **API Integration**: The frontend should connect to the backend automatically
+
+### Troubleshooting
+- **CORS Issues**: Ensure `CORS_ORIGIN=http://localhost:5173` in backend `.env`
+- **API Connection**: Check that `VITE_API_BASE_URL=http://localhost:3001/api` in frontend `.env`
+- **Database Issues**: Ensure PostgreSQL is running and migrations are applied
 
 ## 🎨 Features Overview
 
