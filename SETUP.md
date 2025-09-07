@@ -124,11 +124,6 @@ npm run lint:fix
 npm run format
 npm run format:check
 
-# Storybook
-npm run storybook
-npm run build-storybook
-npm run test-storybook
-
 # Performance
 npm run performance:lighthouse
 npm run performance:budget

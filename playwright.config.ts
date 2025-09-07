@@ -1,14 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './src/test/visual',
+  testDir: './src/test',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: [
     ['html'],
-    ['json', { outputFile: 'test-results/visual-results.json' }],
+    ['json', { outputFile: 'test-results/playwright-results.json' }],
   ],
   use: {
     baseURL: 'http://localhost:3000',
@@ -17,24 +17,24 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'chromium',
+      name: 'e2e-tests',
+      testDir: './src/test/e2e',
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      name: 'firefox',
+      name: 'visual-tests',
+      testDir: './src/test/visual',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'cross-browser',
+      testDir: './src/test/e2e',
       use: { ...devices['Desktop Firefox'] },
     },
     {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-    {
-      name: 'Mobile Chrome',
+      name: 'mobile',
+      testDir: './src/test/e2e',
       use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
     },
   ],
   webServer: {

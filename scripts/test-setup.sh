@@ -55,9 +55,6 @@ npm run test:integration
 echo "  - Running accessibility tests..."
 npm run test:accessibility
 
-# Build Storybook
-echo "📚 Building Storybook..."
-npm run build-storybook
 
 # Run visual tests (if application is running)
 echo "🎨 Testing visual regression setup..."
@@ -85,8 +82,6 @@ echo "  npm run test:accessibility - Run accessibility tests"
 echo "  npm run test:coverage     - Run tests with coverage report"
 echo "  npm run test:coverage:open - Open coverage report in browser"
 echo "  npm run test:ui           - Run tests with UI"
-echo "  npm run storybook         - Start Storybook"
-echo "  npm run test-storybook    - Run Storybook tests"
 echo ""
 echo "Coverage thresholds:"
 echo "  - Global: 80% (branches, functions, lines, statements)"

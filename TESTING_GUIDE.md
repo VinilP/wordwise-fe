@@ -29,6 +29,20 @@ This comprehensive guide covers all aspects of testing in the WordWise platform,
 5. **Reliable Tests**: Tests should be deterministic and not flaky
 6. **Comprehensive Coverage**: Cover all critical paths and edge cases
 
+### Current Test Status (December 2024)
+
+**Overall Health**: 85% success rate (297/350 tests passing)
+
+- ✅ **User Profile Workflow**: 100% (11/11 tests)
+- ✅ **Review Management Workflow**: 100% (11/11 tests)
+- ⚠️ **Book Discovery Workflow**: 22% (2/9 tests)
+- ⚠️ **Component Unit Tests**: 80% (~200/250 tests)
+- ✅ **Accessibility Tests**: 100% (25/25 tests)
+
+**Key Issues**: Component behavior mismatches, Jest to Vitest migration, mock data structure issues
+
+**See**: [CURRENT_TEST_STATUS.md](./CURRENT_TEST_STATUS.md) for detailed troubleshooting guide
+
 ### Testing Pyramid
 
 ```
@@ -297,6 +311,18 @@ npm run test:smoke
 
 ## 🎨 Frontend Testing
 
+### Testing Strategy Overview
+
+Our frontend testing follows a **focused, component-level approach** that separates concerns and provides comprehensive coverage:
+
+```
+Frontend Testing Pyramid:
+├── Unit Tests (70%) - Individual components, hooks, utilities
+├── Integration Tests (20%) - Component workflows and interactions  
+├── E2E Tests (10%) - Complete user journeys across the application
+└── Visual Tests - UI consistency and responsive design
+```
+
 ### Component Testing
 
 **React Component Testing:**
@@ -304,31 +330,24 @@ npm run test:smoke
 // Example: BookCard component test
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BookCard } from '../BookCard';
-import { Book } from '../../types';
+import { createMockBook } from '@/test/utils/test-utils';
 
 describe('BookCard', () => {
-  const mockBook: Book = {
-    id: '1',
+  const mockBook = createMockBook({
     title: 'Test Book',
     author: 'Test Author',
-    description: 'Test Description',
     averageRating: 4.5,
     reviewCount: 10,
-    coverImageUrl: 'https://example.com/cover.jpg',
-    genres: ['Fiction'],
-    publishedYear: 2023,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  };
+  });
 
   const defaultProps = {
     book: mockBook,
-    onFavorite: jest.fn(),
-    onViewDetails: jest.fn()
+    onFavorite: vi.fn(),
+    onViewDetails: vi.fn()
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders book information correctly', () => {
@@ -482,6 +501,27 @@ npm run test:integration
 # Run accessibility tests
 npm run test:accessibility
 
+# Run E2E tests
+npm run test:e2e
+
+# Run E2E tests with UI
+npm run test:e2e:ui
+
+# Run cross-browser E2E tests
+npm run test:e2e:cross-browser
+
+# Run mobile E2E tests
+npm run test:e2e:mobile
+
+# Run visual tests
+npm run test:visual
+
+# Run visual tests with UI
+npm run test:visual:ui
+
+# Run comprehensive test suite
+npm run test:comprehensive
+
 # Run with coverage
 npm run test:coverage
 
@@ -497,7 +537,166 @@ npm run test -- --testNamePattern="should render"
 
 ## 🔗 Integration Testing
 
-### API Integration Tests
+### Frontend Integration Tests
+
+Our integration tests focus on **specific user workflows** rather than testing the entire application at once. This approach provides better isolation, faster execution, and easier debugging.
+
+#### Authentication Workflow Tests
+
+**Focused Authentication Testing:**
+```typescript
+// src/test/integration/auth-workflow-focused.test.tsx
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { render, screen, waitFor } from '@/test/utils/test-utils';
+import userEvent from '@testing-library/user-event';
+import { LoginForm, RegisterForm, ProtectedRoute } from '@/components/auth';
+
+describe('Authentication Workflow Integration Tests', () => {
+  describe('Login Form Workflow', () => {
+    it('should complete successful login flow', async () => {
+      const user = userEvent.setup();
+      mockLogin.mockResolvedValue({
+        user: createMockUser(),
+        token: 'mock-token',
+        refreshToken: 'mock-refresh-token',
+      });
+
+      render(<LoginForm />, { queryClient });
+
+      // Fill in login form
+      const emailInput = screen.getByPlaceholderText(/email address/i);
+      const passwordInput = screen.getByPlaceholderText(/password/i);
+      const submitButton = screen.getByRole('button', { name: /sign in/i });
+
+      await user.type(emailInput, 'test@example.com');
+      await user.type(passwordInput, 'password123');
+      await user.click(submitButton);
+
+      // Wait for successful login
+      await waitFor(() => {
+        expect(mockLogin).toHaveBeenCalledWith({
+          email: 'test@example.com',
+          password: 'password123',
+        });
+      });
+    });
+  });
+});
+```
+
+#### Book Discovery Workflow Tests
+
+**Book Search and Discovery Testing:**
+```typescript
+// src/test/integration/book-discovery-workflow.test.tsx
+describe('Book Discovery Workflow Integration Tests', () => {
+  describe('Book Search Workflow', () => {
+    it('should allow users to search for books', async () => {
+      const user = userEvent.setup();
+      mockSearchBooks.mockResolvedValue({
+        data: mockBooks,
+        pagination: { page: 1, limit: 10, total: 2, totalPages: 1 },
+      });
+
+      render(<BookSearch />, { queryClient });
+
+      // Search for books
+      const searchInput = screen.getByPlaceholderText(/search books/i);
+      await user.type(searchInput, 'gatsby');
+
+      // Wait for search results
+      await waitFor(() => {
+        expect(mockSearchBooks).toHaveBeenCalledWith({
+          q: 'gatsby',
+          page: 1,
+          limit: 10,
+        });
+      });
+    });
+  });
+});
+```
+
+#### Review Management Workflow Tests
+
+**Review Creation and Management Testing:**
+```typescript
+// src/test/integration/review-management-workflow.test.tsx
+describe('Review Management Workflow Integration Tests', () => {
+  describe('Review Creation Workflow', () => {
+    it('should allow users to create a review', async () => {
+      const user = userEvent.setup();
+      mockCreateReview.mockResolvedValue(mockReviews[0]);
+
+      render(<ReviewForm bookId={mockBook.id} />, { 
+        queryClient,
+        initialAuthState: { user: mockUser, isAuthenticated: true }
+      });
+
+      // Fill in review form
+      const ratingInput = screen.getByLabelText(/rating/i);
+      const commentTextarea = screen.getByPlaceholderText(/write your review/i);
+      const submitButton = screen.getByRole('button', { name: /submit review/i });
+
+      await user.type(ratingInput, '5');
+      await user.type(commentTextarea, 'This is an amazing book!');
+      await user.click(submitButton);
+
+      // Wait for review to be created
+      await waitFor(() => {
+        expect(mockCreateReview).toHaveBeenCalledWith({
+          bookId: mockBook.id,
+          rating: 5,
+          comment: 'This is an amazing book!',
+        });
+      });
+    });
+  });
+});
+```
+
+#### User Profile Workflow Tests
+
+**Profile Management Testing:**
+```typescript
+// src/test/integration/user-profile-workflow.test.tsx
+describe('User Profile Workflow Integration Tests', () => {
+  describe('Profile Information Workflow', () => {
+    it('should allow users to edit their profile', async () => {
+      const user = userEvent.setup();
+      mockUpdateProfile.mockResolvedValue({ ...mockUser, name: 'Updated Name' });
+
+      render(<ProfilePage />, { 
+        queryClient,
+        initialAuthState: { user: mockUser, isAuthenticated: true }
+      });
+
+      // Click edit profile button
+      const editButton = screen.getByText(/edit profile/i);
+      await user.click(editButton);
+
+      // Update name
+      const nameInput = screen.getByDisplayValue('Test User');
+      await user.clear(nameInput);
+      await user.type(nameInput, 'Updated Name');
+
+      // Save changes
+      const saveButton = screen.getByRole('button', { name: /save changes/i });
+      await user.click(saveButton);
+
+      // Wait for update
+      await waitFor(() => {
+        expect(mockUpdateProfile).toHaveBeenCalledWith({
+          name: 'Updated Name',
+          email: 'test@example.com',
+        });
+      });
+    });
+  });
+});
+```
+
+### Backend API Integration Tests
 
 **Full API Workflow Testing:**
 ```typescript
@@ -626,54 +825,109 @@ describe('Database Transactions', () => {
 
 ### Playwright E2E Tests
 
-**User Journey Testing:**
+Our E2E tests use **Playwright** to test complete user workflows across the entire application. These tests run in real browsers and test the full stack integration.
+
+#### Complete User Workflow Tests
+
+**Full Application Testing:**
 ```typescript
-// Example: Complete user journey E2E test
+// src/test/e2e/complete-user-workflows.spec.ts
 import { test, expect } from '@playwright/test';
 
-test.describe('User Journey', () => {
-  test('should complete full user workflow', async ({ page }) => {
-    // 1. Navigate to homepage
-    await page.goto('/');
-    await expect(page).toHaveTitle(/WordWise/);
+test.describe('Complete User Workflows', () => {
+  test.describe('Authentication Workflow', () => {
+    test('should complete full registration and login flow', async ({ page }) => {
+      // Start registration
+      await page.click('text=Create Account');
+      await expect(page).toHaveURL('/register');
 
-    // 2. Register new user
-    await page.click('text=Sign Up');
-    await page.fill('[data-testid="email-input"]', 'test@example.com');
-    await page.fill('[data-testid="password-input"]', 'password123');
-    await page.fill('[data-testid="name-input"]', 'Test User');
-    await page.click('[data-testid="register-button"]');
+      // Fill registration form
+      await page.fill('input[placeholder*="Full Name"]', 'Test User');
+      await page.fill('input[placeholder*="Email Address"]', 'test@example.com');
+      await page.fill('input[placeholder*="Password"]', 'password123');
+      await page.fill('input[placeholder*="Confirm Password"]', 'password123');
 
-    // 3. Verify successful registration
-    await expect(page).toHaveURL('/dashboard');
-    await expect(page.locator('text=Welcome, Test User')).toBeVisible();
+      // Submit registration
+      await page.click('button:has-text("Create Account")');
 
-    // 4. Search for a book
-    await page.fill('[data-testid="search-input"]', 'JavaScript');
-    await page.click('[data-testid="search-button"]');
+      // Should redirect to home page after successful registration
+      await expect(page).toHaveURL('/');
+      await expect(page.locator('text=Welcome')).toBeVisible();
 
-    // 5. Verify search results
-    await expect(page.locator('[data-testid="book-card"]')).toHaveCount.greaterThan(0);
+      // Logout and login again
+      await page.click('button:has-text("Sign Out")');
+      await page.click('text=Sign In');
+      
+      await page.fill('input[placeholder*="Email Address"]', 'test@example.com');
+      await page.fill('input[placeholder*="Password"]', 'password123');
+      await page.click('button:has-text("Sign In")');
 
-    // 6. Click on first book
-    await page.click('[data-testid="book-card"]:first-child');
-    await expect(page).toHaveURL(/\/books\/\w+/);
+      // Should be logged in again
+      await expect(page).toHaveURL('/');
+      await expect(page.locator('text=Welcome')).toBeVisible();
+    });
+  });
 
-    // 7. Write a review
-    await page.click('[data-testid="write-review-button"]');
-    await page.fill('[data-testid="review-content"]', 'This is a great book!');
-    await page.click('[data-testid="rating-5"]');
-    await page.click('[data-testid="submit-review-button"]');
+  test.describe('Book Discovery Workflow', () => {
+    test('should search and discover books', async ({ page }) => {
+      // Search for books
+      await page.fill('input[placeholder*="Search books"]', 'gatsby');
+      await page.press('input[placeholder*="Search books"]', 'Enter');
 
-    // 8. Verify review was created
-    await expect(page.locator('text=This is a great book!')).toBeVisible();
+      // Should show search results
+      await expect(page.locator('text=The Great Gatsby')).toBeVisible();
+      await expect(page.locator('text=F. Scott Fitzgerald')).toBeVisible();
 
-    // 9. Go to profile
-    await page.click('[data-testid="profile-link"]');
-    await expect(page).toHaveURL('/profile');
+      // Click on a book
+      await page.click('text=The Great Gatsby');
 
-    // 10. Verify review appears in profile
-    await expect(page.locator('[data-testid="user-review"]')).toHaveCount(1);
+      // Should navigate to book detail page
+      await expect(page).toHaveURL(/\/books\/\d+/);
+      await expect(page.locator('text=The Great Gatsby')).toBeVisible();
+    });
+  });
+
+  test.describe('Review Management Workflow', () => {
+    test.beforeEach(async ({ page }) => {
+      // Login first
+      await page.click('text=Sign In');
+      await page.fill('input[placeholder*="Email Address"]', 'test@example.com');
+      await page.fill('input[placeholder*="Password"]', 'password123');
+      await page.click('button:has-text("Sign In")');
+    });
+
+    test('should create, edit, and delete reviews', async ({ page }) => {
+      // Navigate to a book detail page
+      await page.click('text=Books');
+      await page.click('[data-testid="book-card"]:first-child');
+
+      // Create a review
+      await page.click('text=Write a Review');
+      await page.click('button[data-testid="rating-5"]');
+      await page.fill('textarea[placeholder*="Write your review"]', 'This is an amazing book!');
+      await page.click('button:has-text("Submit Review")');
+
+      // Should show success message
+      await expect(page.locator('text=Review submitted successfully')).toBeVisible();
+
+      // Should show the review in the list
+      await expect(page.locator('text=This is an amazing book!')).toBeVisible();
+
+      // Edit the review
+      await page.click('button[aria-label*="Edit review"]');
+      await page.fill('textarea[placeholder*="Write your review"]', 'Updated review comment');
+      await page.click('button:has-text("Save Changes")');
+
+      // Should show updated review
+      await expect(page.locator('text=Updated review comment')).toBeVisible();
+
+      // Delete the review
+      await page.click('button[aria-label*="Delete review"]');
+      await page.click('button:has-text("Delete")');
+
+      // Should show success message
+      await expect(page.locator('text=Review deleted successfully')).toBeVisible();
+    });
   });
 });
 ```
@@ -725,8 +979,17 @@ test.describe('Visual Regression', () => {
 # Run all E2E tests
 npm run test:e2e
 
+# Run E2E tests with UI
+npm run test:e2e:ui
+
+# Run cross-browser E2E tests
+npm run test:e2e:cross-browser
+
+# Run mobile E2E tests
+npm run test:e2e:mobile
+
 # Run specific test file
-npm run test:e2e -- user-journey.spec.ts
+npm run test:e2e -- complete-user-workflows.spec.ts
 
 # Run tests in headed mode
 npm run test:e2e -- --headed
@@ -736,6 +999,12 @@ npm run test:e2e -- --debug
 
 # Update screenshots
 npm run test:e2e -- --update-snapshots
+
+# Run visual tests
+npm run test:visual
+
+# Run visual tests with UI
+npm run test:visual:ui
 ```
 
 ## ⚡ Performance Testing
@@ -1242,6 +1511,22 @@ export const createMockBooks = (count: number): Book[] =>
    ```
 
 ## 🚨 Troubleshooting
+
+### Current Test Issues (December 2024)
+
+**Most Common Failures:**
+1. **Component Behavior Mismatches**: Tests expect different text/behavior than components provide
+2. **Jest vs Vitest Syntax**: Some tests still use Jest syntax instead of Vitest
+3. **Mock Data Structure Issues**: Test data doesn't match component expectations
+4. **Accessibility Role Mismatches**: Tests expect ARIA roles that don't exist
+
+**Quick Fixes:**
+- Update test selectors to match current component text
+- Replace `jest.spyOn` with `vi.spyOn`
+- Check button disabled state instead of looking for validation errors
+- Add missing ARIA roles or update test expectations
+
+**See**: [CURRENT_TEST_STATUS.md](./CURRENT_TEST_STATUS.md) for detailed troubleshooting guide
 
 ### Common Test Issues
 

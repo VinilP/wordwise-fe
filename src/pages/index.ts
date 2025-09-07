@@ -1,5 +1,4 @@
 // Export all pages from their respective modules
-export * from './auth';
 export * from './books';
 export * from './profile';
 export * from './recommendations';

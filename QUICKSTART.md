@@ -77,7 +77,6 @@ frontend-project/
 │   └── specs/           # Requirements, design, tasks
 ├── chats/               # Development chat history
 ├── scripts/             # Utility scripts
-└── .storybook/          # Storybook configuration
 ```
 
 ## 🛠️ Development
@@ -101,9 +100,6 @@ npm run lint            # Run ESLint
 npm run format          # Format with Prettier
 npm run type-check      # TypeScript type checking
 
-# Storybook
-npm run storybook       # Start Storybook
-npm run build-storybook # Build Storybook
 ```
 
 ## 🏗️ Infrastructure
@@ -121,7 +117,6 @@ Built with a comprehensive design system:
 
 - **Tailwind CSS**: Utility-first CSS framework
 - **Component Library**: Reusable UI components
-- **Storybook**: Component documentation and testing
 - **Responsive Design**: Mobile-first approach
 - **Accessibility**: WCAG 2.1 AA compliance
 
@@ -192,7 +187,7 @@ Comprehensive accessibility features:
 1. Review the requirements in `.kiro/specs/`
 2. Follow the development workflow in `DEVELOPER_ONBOARDING.md`
 3. Run tests and accessibility checks before submitting PRs
-4. Update Storybook documentation for new components
+4. Update component documentation as needed
 
 ## 📚 Documentation
 
@@ -205,10 +200,10 @@ Comprehensive accessibility features:
 ## 🆘 Support
 
 - Check the chat history in `chats/` for implementation details
-- Review Storybook for component documentation
+- Review component documentation and tests
 - Use browser dev tools for debugging
 - Check accessibility reports for compliance issues
 
 ---
 
-**Tech Stack**: React, TypeScript, Vite, Tailwind CSS, Vitest, Playwright, Storybook, AWS, Terraform
+**Tech Stack**: React, TypeScript, Vite, Tailwind CSS, Vitest, Playwright, AWS, Terraform

@@ -146,11 +146,6 @@ expect(mockAuthService.login).toHaveBeenCalledWith(loginData);
 
 ## Visual Testing
 
-### Storybook
-- **Command**: `npm run storybook`
-- **Purpose**: Component documentation and visual testing
-- **Location**: `.storybook/`
-
 ### Playwright
 - **Command**: `npm run test:visual`
 - **Purpose**: Visual regression testing

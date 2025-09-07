@@ -12,7 +12,7 @@ A modern, responsive React application for the WordWise book review platform bui
 - **User Profiles**: Manage favorites and review history
 - **Accessibility**: WCAG 2.1 AA compliant components
 - **Performance**: Optimized with React Query and lazy loading
-- **Testing**: Comprehensive unit, integration, and visual tests
+- **Testing**: Comprehensive unit, integration, and visual tests (85% success rate)
 - **PWA Ready**: Progressive Web App capabilities
 
 ## 📋 Prerequisites
@@ -28,6 +28,8 @@ This project uses a clear documentation structure:
 - **[README.md](./README.md)** - Main documentation (this file)
 - **[QUICKSTART.md](./QUICKSTART.md)** - Quick start guide for immediate setup
 - **[SETUP.md](./SETUP.md)** - Detailed setup instructions and troubleshooting
+- **[TESTING_GUIDE.md](./TESTING_GUIDE.md)** - Comprehensive testing documentation
+- **[CURRENT_TEST_STATUS.md](./CURRENT_TEST_STATUS.md)** - Current test status and troubleshooting
 
 ## 🚀 Quick Start
 
@@ -47,7 +49,52 @@ cp .env.example .env
 
 # Start development server
 npm run dev
+
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
 ```
+
+## 🧪 Testing
+
+The project includes comprehensive testing with an 85% success rate (297/350 tests passing).
+
+### Test Categories
+- **Unit Tests**: Component and utility function testing
+- **Integration Tests**: Workflow and component interaction testing
+- **Accessibility Tests**: WCAG compliance validation
+- **Visual Tests**: UI consistency and responsive design
+
+### Current Status
+- ✅ **User Profile Workflow**: 100% (11/11 tests)
+- ✅ **Review Management Workflow**: 100% (11/11 tests)
+- ⚠️ **Book Discovery Workflow**: 22% (2/9 tests)
+- ⚠️ **Component Unit Tests**: 80% (~200/250 tests)
+- ✅ **Accessibility Tests**: 100% (25/25 tests)
+
+### Quick Test Commands
+```bash
+# Run all tests
+npm test
+
+# Run specific test categories
+npm run test:unit
+npm run test:integration
+npm run test:accessibility
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+### Troubleshooting
+For detailed troubleshooting information, see:
+- **[CURRENT_TEST_STATUS.md](./CURRENT_TEST_STATUS.md)** - Current issues and fixes
+- **[TESTING_GUIDE.md](./TESTING_GUIDE.md)** - Comprehensive testing documentation
 
 **Access Points:**
 - **Frontend**: `http://localhost:5173`
@@ -125,22 +172,23 @@ npm run type-check      # Run TypeScript type checking
 # Testing
 npm run test            # Run all tests
 npm run test:unit       # Run unit tests
-npm run test:integration # Run integration tests
+npm run test:integration # Run focused integration tests
 npm run test:accessibility # Run accessibility tests
+npm run test:e2e        # Run E2E tests (complete user workflows)
+npm run test:e2e:ui     # Run E2E tests with UI
+npm run test:e2e:cross-browser # Run cross-browser E2E tests
+npm run test:e2e:mobile # Run mobile E2E tests
+npm run test:visual     # Run visual regression tests
+npm run test:visual:ui  # Run visual tests with UI
+npm run test:comprehensive # Run comprehensive test suite
 npm run test:coverage   # Run tests with coverage
 npm run test:watch      # Run tests in watch mode
-npm run test:visual     # Run visual regression tests
 
 # Code Quality
 npm run lint            # Run ESLint
 npm run lint:fix        # Fix ESLint issues
 npm run format          # Format code with Prettier
 npm run format:check    # Check code formatting
-
-# Storybook
-npm run storybook       # Start Storybook
-npm run build-storybook # Build Storybook
-npm run test-storybook  # Test Storybook components
 
 # Performance
 npm run performance:lighthouse # Run Lighthouse audit
@@ -176,13 +224,25 @@ The application follows a component-based architecture with:
 
 ## 🧪 Testing
 
+### Testing Strategy
+
+Our testing follows a **focused, component-level approach** that provides comprehensive coverage:
+
+```
+Frontend Testing Pyramid:
+├── Unit Tests (70%) - Individual components, hooks, utilities
+├── Integration Tests (20%) - Component workflows and interactions  
+├── E2E Tests (10%) - Complete user journeys across the application
+└── Visual Tests - UI consistency and responsive design
+```
+
 ### Test Types
 
 1. **Unit Tests**: Test individual components and functions
-2. **Integration Tests**: Test component interactions
-3. **Accessibility Tests**: Test WCAG compliance
-4. **Visual Tests**: Test UI consistency with Playwright
-5. **E2E Tests**: Test complete user workflows
+2. **Integration Tests**: Test focused user workflows (auth, book discovery, reviews, profiles)
+3. **E2E Tests**: Test complete user journeys with Playwright
+4. **Visual Tests**: Test UI consistency and responsive design
+5. **Accessibility Tests**: Test WCAG compliance
 
 ### Running Tests
 
@@ -191,10 +251,17 @@ The application follows a component-based architecture with:
 npm run test:all
 
 # Run specific test types
-npm run test:unit
-npm run test:integration
-npm run test:accessibility
-npm run test:visual
+npm run test:unit                    # Unit tests
+npm run test:integration             # Focused integration tests
+npm run test:e2e                     # E2E tests (complete workflows)
+npm run test:e2e:ui                  # E2E tests with UI
+npm run test:e2e:cross-browser       # Cross-browser E2E tests
+npm run test:e2e:mobile              # Mobile E2E tests
+npm run test:visual                  # Visual regression tests
+npm run test:accessibility           # Accessibility tests
+
+# Run comprehensive test suite
+npm run test:comprehensive
 
 # Run with coverage
 npm run test:coverage
@@ -204,7 +271,8 @@ npm run test:coverage
 
 - Minimum 80% code coverage
 - All components must have unit tests
-- Critical user flows must have integration tests
+- Critical user workflows must have integration tests
+- Complete user journeys must have E2E tests
 - Accessibility tests for all interactive components
 
 ### Testing Tools
@@ -213,7 +281,6 @@ npm run test:coverage
 - **Testing Library**: Component testing utilities
 - **Playwright**: End-to-end and visual testing
 - **MSW**: API mocking for tests
-- **Storybook**: Component development and testing
 
 ## 🎨 Styling & Design
 

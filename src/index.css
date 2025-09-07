@@ -43,4 +43,12 @@
     clip: auto;
     white-space: normal;
   }
+  
+  /* Background image utilities */
+  .bg-library {
+    background-image: url('/lib.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
 }

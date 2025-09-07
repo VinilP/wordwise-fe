@@ -47,8 +47,9 @@ const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <div className="bg-library relative">
+        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-10">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6" data-testid="homepage-title">
               Welcome to <span className="text-yellow-300">WordWise</span>

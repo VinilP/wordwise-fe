@@ -58,9 +58,19 @@ frontend/
 ├── src/
 │   ├── components/__tests__/    # Component unit tests
 │   ├── test/                    # Test utilities and configuration
-│   │   ├── integration/         # Frontend integration tests
-│   │   ├── visual/              # Playwright E2E tests
-│   │   └── utils/               # Test utilities
+│   │   ├── integration/         # Focused workflow integration tests
+│   │   │   ├── auth-workflow-focused.test.tsx
+│   │   │   ├── book-discovery-workflow.test.tsx
+│   │   │   ├── review-management-workflow.test.tsx
+│   │   │   └── user-profile-workflow.test.tsx
+│   │   ├── e2e/                 # End-to-end tests with Playwright
+│   │   │   └── complete-user-workflows.spec.ts
+│   │   ├── visual/              # Visual regression tests
+│   │   ├── accessibility/       # Accessibility tests
+│   │   ├── utils/               # Test utilities and helpers
+│   │   │   └── test-utils.tsx   # Custom render function and mock factories
+│   │   └── mocks/               # Mock data and handlers
+│   │       └── handlers.ts      # MSW request handlers
 │   └── services/__tests__/      # Service layer tests
 └── playwright.config.ts         # Playwright configuration
 ```
@@ -87,7 +97,15 @@ frontend/
 
 ### 2. Integration Tests (20% of test suite)
 
-**API Integration Tests:**
+**Frontend Integration Tests (Focused Workflows):**
+- Authentication workflows (login, registration, logout)
+- Book discovery workflows (search, filtering, pagination)
+- Review management workflows (create, edit, delete)
+- User profile workflows (profile management, favorites)
+- Component interaction testing
+- Service integration testing
+
+**Backend API Integration Tests:**
 - Endpoint functionality
 - Request/response validation
 - Authentication flows
@@ -104,17 +122,16 @@ frontend/
 
 ### 3. End-to-End Tests (10% of test suite)
 
-**User Workflow Tests:**
-- Complete user registration/login flow
-- Book discovery and review process
+**Complete User Workflow Tests (Playwright):**
+- Authentication workflows (registration, login, logout)
+- Book discovery workflows (search, filtering, navigation)
+- Review management workflows (create, edit, delete)
+- User profile workflows (profile management, favorites)
 - Recommendation system usage
-- Profile management
-- Search and filtering
-
-**Cross-Browser Tests:**
-- Chrome, Firefox, Safari
-- Mobile responsiveness
-- Accessibility compliance
+- Cross-browser compatibility testing
+- Mobile responsiveness testing
+- Accessibility compliance testing
+- Visual regression testing
 
 **Coverage Target:** 100% of critical user journeys
 
@@ -165,20 +182,35 @@ npm run test:e2e
 # Unit tests
 npm run test:unit
 
-# Integration tests
+# Integration tests (focused workflows)
 npm run test:integration
 
 # Accessibility tests
 npm run test:accessibility
 
-# Visual/E2E tests
+# E2E tests (complete user workflows)
+npm run test:e2e
+
+# E2E tests with UI
+npm run test:e2e:ui
+
+# Cross-browser E2E tests
+npm run test:e2e:cross-browser
+
+# Mobile E2E tests
+npm run test:e2e:mobile
+
+# Visual regression tests
 npm run test:visual
+
+# Visual tests with UI
+npm run test:visual:ui
 
 # Performance tests
 npm run test:performance
 
-# Complete user workflows
-npm run test:e2e
+# Comprehensive test suite
+npm run test:comprehensive
 ```
 
 ### Test Configuration

@@ -706,7 +706,6 @@ npm run build           # Build for production
 npm run preview         # Preview production build
 npm run lint            # Run linter
 npm run format          # Format code
-npm run storybook       # Start Storybook
 ```
 
 ### Debugging
