@@ -1,5 +1,5 @@
-import { setupServer } from 'msw/node';
-import { handlers, errorHandlers } from './handlers';
+import { setupServer } from "msw/node";
+import { handlers, errorHandlers } from "./handlers";
 
 // Create a server instance for Node.js testing
 export const server = setupServer(...handlers);
@@ -17,4 +17,3 @@ export const disableErrorMode = () => {
   server.resetHandlers();
   server.use(...handlers);
 };
-

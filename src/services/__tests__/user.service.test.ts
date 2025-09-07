@@ -1,10 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import axios from 'axios';
-import { userService } from '../user.service';
-import type { UserProfile, UserProfileWithDetails, UserFavorite } from '@/types';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import axios from "axios";
+import { userService } from "../user.service";
+import type {
+  UserProfile,
+  UserProfileWithDetails,
+  UserFavorite,
+} from "@/types";
 
 // Mock axios
-vi.mock('axios');
+vi.mock("axios");
 const mockedAxios = vi.mocked(axios);
 
 // Mock localStorage
@@ -14,37 +18,37 @@ const localStorageMock = {
   removeItem: vi.fn(),
   clear: vi.fn(),
 };
-Object.defineProperty(window, 'localStorage', {
+Object.defineProperty(window, "localStorage", {
   value: localStorageMock,
 });
 
 const mockUserProfile: UserProfile = {
-  id: '1',
-  email: 'test@example.com',
-  name: 'Test User',
-  createdAt: '2023-01-01T00:00:00Z',
-  updatedAt: '2023-01-01T00:00:00Z',
+  id: "1",
+  email: "test@example.com",
+  name: "Test User",
+  createdAt: "2023-01-01T00:00:00Z",
+  updatedAt: "2023-01-01T00:00:00Z",
   reviewCount: 5,
   favoriteCount: 10,
 };
 
 const mockUserFavorite: UserFavorite = {
-  id: '1',
-  userId: '1',
-  bookId: '1',
-  createdAt: '2023-01-01T00:00:00Z',
+  id: "1",
+  userId: "1",
+  bookId: "1",
+  createdAt: "2023-01-01T00:00:00Z",
   book: {
-    id: '1',
-    title: 'Test Book',
-    author: 'Test Author',
-    description: 'Test description',
-    coverImageUrl: 'https://example.com/cover.jpg',
-    genres: ['Fiction'],
+    id: "1",
+    title: "Test Book",
+    author: "Test Author",
+    description: "Test description",
+    coverImageUrl: "https://example.com/cover.jpg",
+    genres: ["Fiction"],
     publishedYear: 2023,
     averageRating: 4.5,
     reviewCount: 10,
-    createdAt: '2023-01-01T00:00:00Z',
-    updatedAt: '2023-01-01T00:00:00Z',
+    createdAt: "2023-01-01T00:00:00Z",
+    updatedAt: "2023-01-01T00:00:00Z",
   },
 };
 
@@ -54,19 +58,19 @@ const mockUserProfileWithDetails: UserProfileWithDetails = {
   favorites: [mockUserFavorite],
 };
 
-describe('userService', () => {
+describe("userService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorageMock.getItem.mockReturnValue('mock-token');
+    localStorageMock.getItem.mockReturnValue("mock-token");
   });
 
-  describe('getProfile', () => {
-    it('should return user profile successfully', async () => {
+  describe("getProfile", () => {
+    it("should return user profile successfully", async () => {
       const mockResponse = {
         data: {
           success: true,
           data: mockUserProfile,
-          message: 'Profile retrieved successfully',
+          message: "Profile retrieved successfully",
         },
       };
 
@@ -85,12 +89,12 @@ describe('userService', () => {
       expect(result).toEqual(mockUserProfile);
     });
 
-    it('should throw error when API call fails', async () => {
+    it("should throw error when API call fails", async () => {
       const errorResponse = {
         response: {
           data: {
             error: {
-              message: 'Profile not found',
+              message: "Profile not found",
             },
           },
         },
@@ -106,17 +110,19 @@ describe('userService', () => {
         },
       } as any);
 
-      await expect(userService.getProfile()).rejects.toThrow('Profile not found');
+      await expect(userService.getProfile()).rejects.toThrow(
+        "Profile not found",
+      );
     });
   });
 
-  describe('getProfileWithDetails', () => {
-    it('should return user profile with details successfully', async () => {
+  describe("getProfileWithDetails", () => {
+    it("should return user profile with details successfully", async () => {
       const mockResponse = {
         data: {
           success: true,
           data: mockUserProfileWithDetails,
-          message: 'Profile details retrieved successfully',
+          message: "Profile details retrieved successfully",
         },
       };
 
@@ -136,12 +142,12 @@ describe('userService', () => {
     });
   });
 
-  describe('addToFavorites', () => {
-    it('should add book to favorites successfully', async () => {
+  describe("addToFavorites", () => {
+    it("should add book to favorites successfully", async () => {
       const mockResponse = {
         data: {
           success: true,
-          message: 'Book added to favorites',
+          message: "Book added to favorites",
         },
       };
 
@@ -155,15 +161,15 @@ describe('userService', () => {
         },
       } as any);
 
-      await expect(userService.addToFavorites('1')).resolves.toBeUndefined();
+      await expect(userService.addToFavorites("1")).resolves.toBeUndefined();
     });
 
-    it('should throw error when adding to favorites fails', async () => {
+    it("should throw error when adding to favorites fails", async () => {
       const errorResponse = {
         response: {
           data: {
             error: {
-              message: 'Book not found',
+              message: "Book not found",
             },
           },
         },
@@ -179,16 +185,18 @@ describe('userService', () => {
         },
       } as any);
 
-      await expect(userService.addToFavorites('1')).rejects.toThrow('Book not found');
+      await expect(userService.addToFavorites("1")).rejects.toThrow(
+        "Book not found",
+      );
     });
   });
 
-  describe('removeFromFavorites', () => {
-    it('should remove book from favorites successfully', async () => {
+  describe("removeFromFavorites", () => {
+    it("should remove book from favorites successfully", async () => {
       const mockResponse = {
         data: {
           success: true,
-          message: 'Book removed from favorites',
+          message: "Book removed from favorites",
         },
       };
 
@@ -202,15 +210,17 @@ describe('userService', () => {
         },
       } as any);
 
-      await expect(userService.removeFromFavorites('1')).resolves.toBeUndefined();
+      await expect(
+        userService.removeFromFavorites("1"),
+      ).resolves.toBeUndefined();
     });
 
-    it('should throw error when removing from favorites fails', async () => {
+    it("should throw error when removing from favorites fails", async () => {
       const errorResponse = {
         response: {
           data: {
             error: {
-              message: 'Favorite not found',
+              message: "Favorite not found",
             },
           },
         },
@@ -226,17 +236,19 @@ describe('userService', () => {
         },
       } as any);
 
-      await expect(userService.removeFromFavorites('1')).rejects.toThrow('Favorite not found');
+      await expect(userService.removeFromFavorites("1")).rejects.toThrow(
+        "Favorite not found",
+      );
     });
   });
 
-  describe('getFavorites', () => {
-    it('should return user favorites successfully', async () => {
+  describe("getFavorites", () => {
+    it("should return user favorites successfully", async () => {
       const mockResponse = {
         data: {
           success: true,
           data: [mockUserFavorite],
-          message: 'Favorites retrieved successfully',
+          message: "Favorites retrieved successfully",
         },
       };
 
@@ -256,13 +268,13 @@ describe('userService', () => {
     });
   });
 
-  describe('checkFavoriteStatus', () => {
-    it('should return favorite status successfully', async () => {
+  describe("checkFavoriteStatus", () => {
+    it("should return favorite status successfully", async () => {
       const mockResponse = {
         data: {
           success: true,
           data: { isFavorite: true },
-          message: 'Favorite status retrieved successfully',
+          message: "Favorite status retrieved successfully",
         },
       };
 
@@ -276,17 +288,17 @@ describe('userService', () => {
         },
       } as any);
 
-      const result = await userService.checkFavoriteStatus('1');
+      const result = await userService.checkFavoriteStatus("1");
 
       expect(result).toBe(true);
     });
 
-    it('should return false when book is not favorited', async () => {
+    it("should return false when book is not favorited", async () => {
       const mockResponse = {
         data: {
           success: true,
           data: { isFavorite: false },
-          message: 'Favorite status retrieved successfully',
+          message: "Favorite status retrieved successfully",
         },
       };
 
@@ -300,13 +312,9 @@ describe('userService', () => {
         },
       } as any);
 
-      const result = await userService.checkFavoriteStatus('1');
+      const result = await userService.checkFavoriteStatus("1");
 
       expect(result).toBe(false);
     });
   });
 });
-
-
-
-

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import type { CreateReviewRequest, UpdateReviewRequest } from '../../types';
-import RatingInput from './RatingInput';
+import React, { useState } from "react";
+import type { CreateReviewRequest, UpdateReviewRequest } from "../../types";
+import RatingInput from "./RatingInput";
 
 interface ReviewFormProps {
   bookId?: string;
@@ -21,26 +21,28 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   onSubmit,
   onCancel,
   isLoading = false,
-  submitButtonText = 'Submit Review',
+  submitButtonText = "Submit Review",
   showCancel = false,
 }) => {
   const [rating, setRating] = useState(initialData?.rating || 0);
-  const [content, setContent] = useState(initialData?.content || '');
-  const [errors, setErrors] = useState<{ rating?: string; content?: string }>({});
+  const [content, setContent] = useState(initialData?.content || "");
+  const [errors, setErrors] = useState<{ rating?: string; content?: string }>(
+    {},
+  );
 
   const validateForm = (): boolean => {
     const newErrors: { rating?: string; content?: string } = {};
 
     if (rating === 0) {
-      newErrors.rating = 'Please select a rating';
+      newErrors.rating = "Please select a rating";
     }
 
     if (content.trim().length < 10) {
-      newErrors.content = 'Review must be at least 10 characters long';
+      newErrors.content = "Review must be at least 10 characters long";
     }
 
     if (content.trim().length > 1000) {
-      newErrors.content = 'Review must be less than 1000 characters';
+      newErrors.content = "Review must be less than 1000 characters";
     }
 
     setErrors(newErrors);
@@ -50,37 +52,41 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    console.log('📝 ReviewForm: Form submission started');
-    
+
+    console.log("📝 ReviewForm: Form submission started");
+
     if (!validateForm()) {
-      console.log('❌ ReviewForm: Form validation failed');
+      console.log("❌ ReviewForm: Form validation failed");
       return;
     }
 
     try {
-      const reviewData = bookId 
+      const reviewData = bookId
         ? { bookId, rating, content: content.trim() }
         : { rating, content: content.trim() };
-      
-      console.log('📤 ReviewForm: Calling onSubmit with data:', reviewData);
+
+      console.log("📤 ReviewForm: Calling onSubmit with data:", reviewData);
       await onSubmit(reviewData);
-      console.log('✅ ReviewForm: onSubmit completed successfully');
-      
+      console.log("✅ ReviewForm: onSubmit completed successfully");
+
       // Reset form if it's a create form (has bookId)
       if (bookId) {
         setRating(0);
-        setContent('');
+        setContent("");
         setErrors({});
-        console.log('🔄 ReviewForm: Form reset completed');
+        console.log("🔄 ReviewForm: Form reset completed");
       }
     } catch (error) {
-      console.error('❌ ReviewForm: Error submitting review:', error);
+      console.error("❌ ReviewForm: Error submitting review:", error);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6" data-testid="review-form">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6"
+      data-testid="review-form"
+    >
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Rating *
@@ -94,7 +100,10 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       </div>
 
       <div>
-        <label htmlFor="review-content" className="block text-sm font-medium text-gray-700 mb-2">
+        <label
+          htmlFor="review-content"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
           Review *
         </label>
         <textarea
@@ -105,8 +114,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
           rows={6}
           className={`
             w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-            ${errors.content ? 'border-red-300' : 'border-gray-300'}
-            ${isLoading ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'}
+            ${errors.content ? "border-red-300" : "border-gray-300"}
+            ${isLoading ? "bg-gray-50 cursor-not-allowed" : "bg-white"}
           `}
           placeholder="Share your thoughts about this book..."
           maxLength={1000}
@@ -143,9 +152,24 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         >
           {isLoading ? (
             <div className="flex items-center">
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <svg
+                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
               </svg>
               Submitting...
             </div>

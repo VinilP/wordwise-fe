@@ -1,5 +1,5 @@
-import React from 'react';
-import { BookDetail } from '../../components/books';
+import React from "react";
+import { BookDetail } from "../../components/books";
 
 export const BookDetailPage: React.FC = () => {
   return (

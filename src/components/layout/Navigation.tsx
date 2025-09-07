@@ -1,15 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { useFocusTrap } from '../../hooks/useAccessibility';
+import React, { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useFocusTrap } from "../../hooks/useAccessibility";
 
 const Navigation: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  
+
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
@@ -22,10 +22,10 @@ const Navigation: React.FC = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/');
+      navigate("/");
       setIsUserMenuOpen(false);
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     }
   };
 
@@ -33,7 +33,6 @@ const Navigation: React.FC = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
     setIsUserMenuOpen(false);
   };
-
 
   const closeMenus = () => {
     setIsMobileMenuOpen(false);
@@ -50,7 +49,7 @@ const Navigation: React.FC = () => {
       ) {
         setIsMobileMenuOpen(false);
       }
-      
+
       if (
         userMenuRef.current &&
         !userMenuRef.current.contains(event.target as Node) &&
@@ -60,35 +59,39 @@ const Navigation: React.FC = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Close menus on escape key
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         closeMenus();
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, []);
 
   const navigationLinks = [
-    { to: '/books', label: 'Books' },
-    ...(user ? [{ to: '/recommendations', label: 'Recommendations' }] : []),
+    { to: "/books", label: "Books" },
+    ...(user ? [{ to: "/recommendations", label: "Recommendations" }] : []),
   ];
 
   return (
-    <nav className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50" role="navigation" aria-label="Main navigation">
+    <nav
+      className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50"
+      role="navigation"
+      aria-label="Main navigation"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Brand */}
           <div className="flex items-center">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
               aria-label="WordWise - Go to homepage"
             >
@@ -125,19 +128,26 @@ const Navigation: React.FC = () => {
                 >
                   <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-medium">
-                      {user?.name?.charAt(0).toUpperCase() || 'U'}
+                      {user?.name?.charAt(0).toUpperCase() || "U"}
                     </span>
                   </div>
-                  <span className="hidden lg:block">{user?.name || 'User'}</span>
+                  <span className="hidden lg:block">
+                    {user?.name || "User"}
+                  </span>
                   <svg
                     className={`h-4 w-4 transition-transform duration-200 ${
-                      isUserMenuOpen ? 'rotate-180' : ''
+                      isUserMenuOpen ? "rotate-180" : ""
                     }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
 
@@ -150,8 +160,12 @@ const Navigation: React.FC = () => {
                     aria-orientation="vertical"
                   >
                     <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900">{user?.name || 'User'}</p>
-                      <p className="text-sm text-gray-500">{user?.email || ''}</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {user?.name || "User"}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {user?.email || ""}
+                      </p>
                     </div>
                     <Link
                       to="/profile"
@@ -197,7 +211,7 @@ const Navigation: React.FC = () => {
               className="text-gray-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md p-2"
               aria-label="Search books"
               data-testid="mobile-search-button"
-              onClick={() => navigate('/books')}
+              onClick={() => navigate("/books")}
             >
               <svg
                 className="h-6 w-6"
@@ -214,29 +228,39 @@ const Navigation: React.FC = () => {
                 />
               </svg>
             </button>
-            
+
             {/* Mobile menu button */}
             <button
               ref={mobileMenuButtonRef}
               type="button"
               className="text-gray-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md p-2"
-              aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-menu"
               onClick={toggleMobileMenu}
               data-testid="mobile-menu-button"
             >
-              <svg 
-                className="h-6 w-6" 
-                fill="none" 
-                viewBox="0 0 24 24" 
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
                 aria-hidden="true"
               >
                 {isMobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 )}
               </svg>
             </button>
@@ -265,7 +289,7 @@ const Navigation: React.FC = () => {
                   {link.label}
                 </Link>
               ))}
-              
+
               {/* Mobile User Menu */}
               {user ? (
                 <>
@@ -278,7 +302,10 @@ const Navigation: React.FC = () => {
                     Profile
                   </Link>
                   <div className="px-3 py-2 text-sm text-gray-500">
-                    Welcome, <span className="font-medium text-gray-700">{user?.name || 'User'}</span>
+                    Welcome,{" "}
+                    <span className="font-medium text-gray-700">
+                      {user?.name || "User"}
+                    </span>
                   </div>
                   <button
                     onClick={handleLogout}

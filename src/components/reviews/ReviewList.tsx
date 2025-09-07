@@ -1,6 +1,6 @@
-import React from 'react';
-import type { Review } from '../../types';
-import ReviewCard from './ReviewCard';
+import React from "react";
+import type { Review } from "../../types";
+import ReviewCard from "./ReviewCard";
 
 interface ReviewListProps {
   reviews: Review[];
@@ -18,14 +18,17 @@ const ReviewList: React.FC<ReviewListProps> = ({
   onDeleteReview,
   showBookInfo = false,
   isLoading = false,
-  emptyMessage = 'No reviews yet.',
-  className = '',
+  emptyMessage = "No reviews yet.",
+  className = "",
 }) => {
   if (isLoading) {
     return (
       <div className={`space-y-4 ${className}`}>
         {[...Array(3)].map((_, index) => (
-          <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm animate-pulse">
+          <div
+            key={index}
+            className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm animate-pulse"
+          >
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
@@ -77,15 +80,17 @@ const ReviewList: React.FC<ReviewListProps> = ({
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {reviews.filter(review => review && review.id).map((review) => (
-        <ReviewCard
-          key={review.id}
-          review={review}
-          onEdit={onEditReview}
-          onDelete={onDeleteReview}
-          showBookInfo={showBookInfo}
-        />
-      ))}
+      {reviews
+        .filter((review) => review && review.id)
+        .map((review) => (
+          <ReviewCard
+            key={review.id}
+            review={review}
+            onEdit={onEditReview}
+            onDelete={onDeleteReview}
+            showBookInfo={showBookInfo}
+          />
+        ))}
     </div>
   );
 };

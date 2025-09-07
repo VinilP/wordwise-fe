@@ -1,26 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { bookService, reviewService } from '../../services';
-import { useAuth } from '../../contexts/AuthContext';
-import FavoriteButton from './FavoriteButton';
-import ReviewForm from '../reviews/ReviewForm';
-import ReviewList from '../reviews/ReviewList';
-import ReviewEditModal from '../reviews/ReviewEditModal';
-import { useBookReviews } from '../../hooks/useReviews';
-import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { hasRating, getRatingValue, getReviewCount, generateStarRating } from '../../utils/ratingUtils';
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { bookService, reviewService } from "../../services";
+import { useAuth } from "../../contexts/AuthContext";
+import FavoriteButton from "./FavoriteButton";
+import ReviewForm from "../reviews/ReviewForm";
+import ReviewList from "../reviews/ReviewList";
+import ReviewEditModal from "../reviews/ReviewEditModal";
+import { useBookReviews } from "../../hooks/useReviews";
+import { LoadingSpinner } from "../ui/LoadingSpinner";
+import {
+  hasRating,
+  getRatingValue,
+  getReviewCount,
+  generateStarRating,
+} from "../../utils/ratingUtils";
 
 export const BookDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
-  const [currentImageUrl, setCurrentImageUrl] = useState('');
-  const [editingReview, setEditingReview] = useState<any>(null);
+  const [currentImageUrl, setCurrentImageUrl] = useState("");
+  const [editingReview, setEditingReview] = useState<{
+    id: string;
+    rating: number;
+    comment: string;
+  } | null>(null);
   const [isEditingReview, setIsEditingReview] = useState(false);
 
   const {
@@ -30,10 +39,10 @@ export const BookDetail: React.FC = () => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['book', id],
+    queryKey: ["book", id],
     queryFn: () => {
       if (!id) {
-        throw new Error('Book ID is required');
+        throw new Error("Book ID is required");
       }
       return bookService.getBookById(id);
     },
@@ -44,7 +53,10 @@ export const BookDetail: React.FC = () => {
   // Add timeout for slow-loading images
   useEffect(() => {
     if (book) {
-      console.log('📖 Book data updated, setting image URL:', book.coverImageUrl);
+      console.log(
+        "📖 Book data updated, setting image URL:",
+        book.coverImageUrl,
+      );
       setCurrentImageUrl(book.coverImageUrl);
       setImageLoading(true);
       setImageError(false);
@@ -65,24 +77,24 @@ export const BookDetail: React.FC = () => {
 
   // Function to try fallback image URLs
   const tryFallbackImage = (originalUrl: string) => {
-    console.log('🔄 tryFallbackImage called with:', originalUrl);
+    console.log("🔄 tryFallbackImage called with:", originalUrl);
     // Try medium size instead of large
-    if (originalUrl.includes('-L.jpg')) {
-      const mediumUrl = originalUrl.replace('-L.jpg', '-M.jpg');
-      console.log('📏 Trying medium size:', mediumUrl);
+    if (originalUrl.includes("-L.jpg")) {
+      const mediumUrl = originalUrl.replace("-L.jpg", "-M.jpg");
+      console.log("📏 Trying medium size:", mediumUrl);
       setCurrentImageUrl(mediumUrl);
       setImageLoading(true);
       setImageError(false);
-    } else if (originalUrl.includes('-M.jpg')) {
+    } else if (originalUrl.includes("-M.jpg")) {
       // Try small size
-      const smallUrl = originalUrl.replace('-M.jpg', '-S.jpg');
-      console.log('📏 Trying small size:', smallUrl);
+      const smallUrl = originalUrl.replace("-M.jpg", "-S.jpg");
+      console.log("📏 Trying small size:", smallUrl);
       setCurrentImageUrl(smallUrl);
       setImageLoading(true);
       setImageError(false);
     } else {
       // No more fallbacks, show placeholder
-      console.log('🚫 No more fallback sizes available');
+      console.log("🚫 No more fallback sizes available");
       setImageLoading(false);
       setImageError(true);
     }
@@ -95,97 +107,110 @@ export const BookDetail: React.FC = () => {
     refetch: refetchReviews,
   } = useBookReviews(id);
 
-  const handleReviewSubmit = async (reviewData: any) => {
+  const handleReviewSubmit = async (reviewData: {
+    rating: number;
+    content: string;
+  }) => {
     if (!id) return;
-    
-    console.log('🚀 Starting review submission...');
+
+    console.log("🚀 Starting review submission...");
     setIsSubmittingReview(true);
     try {
-      console.log('Submitting review:', {
+      console.log("Submitting review:", {
         bookId: id,
         rating: reviewData.rating,
         content: reviewData.content,
       });
-      
+
       const review = await reviewService.createReview({
         bookId: id,
         rating: reviewData.rating,
         content: reviewData.content,
       });
-      
-      console.log('✅ Review created successfully:', review);
+
+      console.log("✅ Review created successfully:", review);
       setShowReviewForm(false);
-      
-      console.log('🔄 Refreshing data...');
+
+      console.log("🔄 Refreshing data...");
       // Refresh data without causing page reload
       await Promise.all([
         refetchReviews(), // Refresh reviews list
-        refetch() // Refresh book data to update rating
+        refetch(), // Refresh book data to update rating
       ]);
-      
+
       // Invalidate books list queries to ensure updated ratings show on books page
-      await queryClient.invalidateQueries({ queryKey: ['books'] });
-      console.log('✅ Data refresh completed');
+      await queryClient.invalidateQueries({ queryKey: ["books"] });
+      console.log("✅ Data refresh completed");
     } catch (error) {
-      console.error('❌ Failed to submit review:', error);
+      console.error("❌ Failed to submit review:", error);
       // You could add a toast notification here
-      alert(`Failed to submit review: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(
+        `Failed to submit review: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
       setIsSubmittingReview(false);
-      console.log('🏁 Review submission process completed');
+      console.log("🏁 Review submission process completed");
     }
   };
 
-  const handleEditReview = (review: any) => {
+  const handleEditReview = (review: {
+    id: string;
+    rating: number;
+    comment: string;
+  }) => {
     setEditingReview(review);
   };
 
-  const handleUpdateReview = async (reviewId: string, updateData: any) => {
+  const handleUpdateReview = async (
+    reviewId: string,
+    updateData: {
+      rating: number;
+      content: string;
+    },
+  ) => {
     setIsEditingReview(true);
     try {
-      console.log('🔄 Updating review:', reviewId, updateData);
+      console.log("🔄 Updating review:", reviewId, updateData);
       await reviewService.updateReview(reviewId, updateData);
-      console.log('✅ Review updated successfully');
-      
+      console.log("✅ Review updated successfully");
+
       // Refresh data
-      await Promise.all([
-        refetchReviews(),
-        refetch()
-      ]);
-      
+      await Promise.all([refetchReviews(), refetch()]);
+
       // Invalidate books list queries to ensure updated ratings show on books page
-      await queryClient.invalidateQueries({ queryKey: ['books'] });
-      
+      await queryClient.invalidateQueries({ queryKey: ["books"] });
+
       setEditingReview(null);
     } catch (error) {
-      console.error('❌ Failed to update review:', error);
-      alert(`Failed to update review: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error("❌ Failed to update review:", error);
+      alert(
+        `Failed to update review: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
       setIsEditingReview(false);
     }
   };
 
   const handleDeleteReview = async (reviewId: string) => {
-    if (!confirm('Are you sure you want to delete this review?')) {
+    if (!confirm("Are you sure you want to delete this review?")) {
       return;
     }
 
     try {
-      console.log('🗑️ Deleting review:', reviewId);
+      console.log("🗑️ Deleting review:", reviewId);
       await reviewService.deleteReview(reviewId);
-      console.log('✅ Review deleted successfully');
-      
+      console.log("✅ Review deleted successfully");
+
       // Refresh data
-      await Promise.all([
-        refetchReviews(),
-        refetch()
-      ]);
-      
+      await Promise.all([refetchReviews(), refetch()]);
+
       // Invalidate books list queries to ensure updated ratings show on books page
-      await queryClient.invalidateQueries({ queryKey: ['books'] });
+      await queryClient.invalidateQueries({ queryKey: ["books"] });
     } catch (error) {
-      console.error('❌ Failed to delete review:', error);
-      alert(`Failed to delete review: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error("❌ Failed to delete review:", error);
+      alert(
+        `Failed to delete review: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   };
 
@@ -197,13 +222,13 @@ export const BookDetail: React.FC = () => {
     const starRating = generateStarRating(rating);
     return starRating.map((starType, index) => {
       switch (starType) {
-        case 'full':
+        case "full":
           return (
             <span key={index} className="text-yellow-400 text-xl">
               ★
             </span>
           );
-        case 'half':
+        case "half":
           return (
             <span key={index} className="text-yellow-400 text-xl">
               ☆
@@ -266,7 +291,9 @@ export const BookDetail: React.FC = () => {
             Failed to load book details
           </h3>
           <p className="text-gray-600 mb-4">
-            {error instanceof Error ? error.message : 'Something went wrong while loading the book.'}
+            {error instanceof Error
+              ? error.message
+              : "Something went wrong while loading the book."}
           </p>
           <div className="space-x-4">
             <button
@@ -340,38 +367,42 @@ export const BookDetail: React.FC = () => {
               {/* Loading skeleton */}
               {imageLoading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                  <LoadingSpinner size="lg" text="Loading cover..." className="text-gray-400" />
+                  <LoadingSpinner
+                    size="lg"
+                    text="Loading cover..."
+                    className="text-gray-400"
+                  />
                 </div>
               )}
-              
+
               {/* Book cover image */}
               <img
                 src={currentImageUrl}
                 alt={`Cover of ${book.title}`}
                 className={`w-full h-full object-cover ${
-                  imageLoading ? 'opacity-0' : 'opacity-100'
+                  imageLoading ? "opacity-0" : "opacity-100"
                 }`}
                 onLoad={() => {
-                  console.log('🖼️ Image loaded successfully:', currentImageUrl);
+                  console.log("🖼️ Image loaded successfully:", currentImageUrl);
                   setImageLoading(false);
                   setImageError(false);
                 }}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  console.log('❌ Image failed to load:', target.src);
+                  console.log("❌ Image failed to load:", target.src);
                   // Try fallback images first
-                  if (target.src !== '/placeholder-book-cover.jpg') {
-                    console.log('🔄 Trying fallback image...');
+                  if (target.src !== "/placeholder-book-cover.jpg") {
+                    console.log("🔄 Trying fallback image...");
                     tryFallbackImage(target.src);
                   } else {
                     // No more fallbacks, show placeholder
-                    console.log('🚫 No more fallbacks, showing placeholder');
+                    console.log("🚫 No more fallbacks, showing placeholder");
                     setImageLoading(false);
                     setImageError(true);
                   }
                 }}
               />
-              
+
               {/* Placeholder for missing images */}
               {imageError && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-200 text-gray-500">
@@ -389,7 +420,9 @@ export const BookDetail: React.FC = () => {
                       d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                     />
                   </svg>
-                  <span className="text-sm text-center px-4">No Cover Available</span>
+                  <span className="text-sm text-center px-4">
+                    No Cover Available
+                  </span>
                 </div>
               )}
             </div>
@@ -401,26 +434,40 @@ export const BookDetail: React.FC = () => {
           <div className="space-y-6">
             {/* Title and author */}
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="book-title">
+              <h1
+                className="text-3xl font-bold text-gray-900 mb-2"
+                data-testid="book-title"
+              >
                 {book.title}
               </h1>
-              <p className="text-xl text-gray-600 mb-4" data-testid="book-author">
+              <p
+                className="text-xl text-gray-600 mb-4"
+                data-testid="book-author"
+              >
                 by {book.author}
               </p>
-              
+
               {/* Rating */}
               <div className="flex items-center space-x-4 mb-4">
                 <div className="flex items-center">
                   {hasRating(book.averageRating) ? (
                     <>
                       <div className="flex mr-2">
-                        {renderStars(typeof book.averageRating === 'string' ? parseFloat(book.averageRating) : book.averageRating)}
+                        {renderStars(
+                          typeof book.averageRating === "string"
+                            ? parseFloat(book.averageRating)
+                            : book.averageRating,
+                        )}
                       </div>
                       <span className="text-lg font-medium text-gray-900">
                         {getRatingValue(book.averageRating)}
                       </span>
                       <span className="text-gray-600 ml-2">
-                        ({getReviewCount(book.reviewCount)} {getReviewCount(book.reviewCount) === 1 ? 'review' : 'reviews'})
+                        ({getReviewCount(book.reviewCount)}{" "}
+                        {getReviewCount(book.reviewCount) === 1
+                          ? "review"
+                          : "reviews"}
+                        )
                       </span>
                     </>
                   ) : (
@@ -432,7 +479,9 @@ export const BookDetail: React.FC = () => {
 
             {/* Genres */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Genres</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Genres
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {book.genres.map((genre) => (
                   <span
@@ -447,13 +496,17 @@ export const BookDetail: React.FC = () => {
 
             {/* Publication info */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Publication Info</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Publication Info
+              </h3>
               <p className="text-gray-600">Published in {book.publishedYear}</p>
             </div>
 
             {/* Description */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Description
+              </h3>
               <div className="prose prose-gray max-w-none">
                 <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                   {book.description}
@@ -464,26 +517,26 @@ export const BookDetail: React.FC = () => {
             {/* Action buttons */}
             <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-200">
               {isAuthenticated ? (
-                <button 
+                <button
                   onClick={() => setShowReviewForm(!showReviewForm)}
                   className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium"
                   data-testid="write-review-button"
                 >
-                  {showReviewForm ? 'Cancel Review' : 'Write a Review'}
+                  {showReviewForm ? "Cancel Review" : "Write a Review"}
                 </button>
               ) : (
-                <Link 
+                <Link
                   to="/login"
                   className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium"
                 >
                   Login to Write Review
                 </Link>
               )}
-              
+
               {book && (
-                <FavoriteButton 
-                  book={book} 
-                  size="lg" 
+                <FavoriteButton
+                  book={book}
+                  size="lg"
                   showText={true}
                   onFavoriteChange={() => {
                     // Optional: Add any callback when favorite status changes
@@ -498,11 +551,13 @@ export const BookDetail: React.FC = () => {
       {/* Reviews section */}
       <div className="mt-12 pt-8 border-t border-gray-200">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Reviews</h2>
-        
+
         {/* Review Form */}
         {showReviewForm && isAuthenticated && (
           <div className="mb-8 p-6 bg-gray-50 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Write a Review</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Write a Review
+            </h3>
             <ReviewForm
               bookId={id}
               onSubmit={handleReviewSubmit}
@@ -522,7 +577,7 @@ export const BookDetail: React.FC = () => {
         ) : reviewsError ? (
           <div className="text-center py-8 text-red-600">
             <p>Failed to load reviews. Please try again.</p>
-            <button 
+            <button
               onClick={() => refetchReviews()}
               className="mt-2 text-blue-600 hover:text-blue-800"
             >
@@ -530,8 +585,8 @@ export const BookDetail: React.FC = () => {
             </button>
           </div>
         ) : reviews && reviews.length > 0 ? (
-          <ReviewList 
-            reviews={reviews} 
+          <ReviewList
+            reviews={reviews}
             onEditReview={handleEditReview}
             onDeleteReview={handleDeleteReview}
           />

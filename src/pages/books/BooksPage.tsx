@@ -1,5 +1,5 @@
-import React from 'react';
-import { BookList } from '../../components/books';
+import React from "react";
+import { BookList } from "../../components/books";
 
 export const BooksPage: React.FC = () => {
   return (
@@ -8,10 +8,11 @@ export const BooksPage: React.FC = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Book Catalog</h1>
           <p className="mt-2 text-gray-600">
-            Discover your next great read from our extensive collection of books.
+            Discover your next great read from our extensive collection of
+            books.
           </p>
         </div>
-        
+
         <BookList />
       </div>
     </div>

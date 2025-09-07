@@ -5,7 +5,7 @@ export const testConfig = {
     long: 30000,
     short: 5000,
   },
-  
+
   // Coverage thresholds
   coverage: {
     global: {
@@ -27,21 +27,21 @@ export const testConfig = {
       statements: 90,
     },
   },
-  
+
   // Test data
   testData: {
     user: {
-      email: 'test@example.com',
-      password: 'password123',
-      name: 'Test User',
+      email: "test@example.com",
+      password: "password123",
+      name: "Test User",
     },
     book: {
-      title: 'Test Book',
-      author: 'Test Author',
-      description: 'Test description',
+      title: "Test Book",
+      author: "Test Author",
+      description: "Test description",
     },
   },
-  
+
   // Mock API responses
   mockResponses: {
     success: (data: any) => ({ data, status: 200 }),
@@ -50,7 +50,7 @@ export const testConfig = {
       status,
     }),
   },
-  
+
   // Test utilities
   utils: {
     waitFor: {
@@ -63,7 +63,7 @@ export const testConfig = {
       delay: 1000,
     },
   },
-  
+
   // Visual testing
   visual: {
     thresholds: {
@@ -77,14 +77,13 @@ export const testConfig = {
       large: { width: 1440, height: 900 },
     },
   },
-  
+
   // Accessibility testing
   accessibility: {
     rules: {
-      'color-contrast': { enabled: true },
-      'keyboard-navigation': { enabled: true },
-      'focus-management': { enabled: true },
+      "color-contrast": { enabled: true },
+      "keyboard-navigation": { enabled: true },
+      "focus-management": { enabled: true },
     },
   },
 };
-

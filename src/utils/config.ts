@@ -5,9 +5,9 @@ interface Config {
 }
 
 const config: Config = {
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api',
-  appName: import.meta.env.VITE_APP_NAME || 'Book Review Platform',
-  nodeEnv: import.meta.env.VITE_NODE_ENV || 'development',
+  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api",
+  appName: import.meta.env.VITE_APP_NAME || "Book Review Platform",
+  nodeEnv: import.meta.env.VITE_NODE_ENV || "development",
 };
 
 // Named exports for backward compatibility

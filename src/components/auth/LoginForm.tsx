@@ -1,36 +1,35 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { AccessibleInput } from '../ui/AccessibleInput';
-import { AccessibleButton } from '../ui/AccessibleButton';
-import { ErrorMessage } from '../ui/ErrorMessage';
-import { LoadingSpinner } from '../ui/LoadingSpinner';
-import type { LoginRequest } from '@/types';
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { AccessibleInput } from "../ui/AccessibleInput";
+import { AccessibleButton } from "../ui/AccessibleButton";
+import { ErrorMessage } from "../ui/ErrorMessage";
+import type { LoginRequest } from "@/types";
 
 // Validation schema
 const loginSchema = z.object({
   email: z
     .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
+    .min(1, "Email is required")
+    .email("Please enter a valid email address"),
   password: z
     .string()
-    .min(1, 'Password is required')
-    .min(6, 'Password must be at least 6 characters'),
+    .min(1, "Password is required")
+    .min(6, "Password must be at least 6 characters"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const LoginForm: React.FC = () => {
-  const [submitError, setSubmitError] = useState<string>('');
+  const [submitError, setSubmitError] = useState<string>("");
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || '/';
+  const from = location.state?.from?.pathname || "/";
 
   const {
     register,
@@ -42,16 +41,20 @@ const LoginForm: React.FC = () => {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      setSubmitError('');
+      setSubmitError("");
       const loginData: LoginRequest = {
         email: data.email,
         password: data.password,
       };
-      
+
       await login(loginData);
       navigate(from, { replace: true });
-    } catch (error: any) {
-      setSubmitError(error.message || 'Login failed. Please try again.');
+    } catch (error: unknown) {
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Login failed. Please try again.",
+      );
     }
   };
 
@@ -63,7 +66,7 @@ const LoginForm: React.FC = () => {
             Sign in to your account
           </h1>
           <p className="text-sm text-gray-600">
-            Or{' '}
+            Or{" "}
             <Link
               to="/register"
               className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-1"
@@ -74,15 +77,15 @@ const LoginForm: React.FC = () => {
         </div>
 
         <div className="bg-white py-8 px-6 shadow-lg rounded-lg">
-          <form 
-            className="space-y-6" 
+          <form
+            className="space-y-6"
             onSubmit={handleSubmit(onSubmit)}
             role="form"
             aria-label="Sign in form"
             noValidate
           >
             <AccessibleInput
-              {...register('email')}
+              {...register("email")}
               label="Email address"
               type="email"
               autoComplete="email"
@@ -95,7 +98,7 @@ const LoginForm: React.FC = () => {
             />
 
             <AccessibleInput
-              {...register('password')}
+              {...register("password")}
               label="Password"
               type="password"
               autoComplete="current-password"

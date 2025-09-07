@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import type { Review, UpdateReviewRequest } from '../../types';
-import ReviewForm from './ReviewForm';
+import React, { useEffect, useRef } from "react";
+import type { Review, UpdateReviewRequest } from "../../types";
+import ReviewForm from "./ReviewForm";
 
 interface ReviewEditModalProps {
   review: Review | null;
@@ -21,27 +21,30 @@ const ReviewEditModal: React.FC<ReviewEditModalProps> = ({
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) {
+      if (event.key === "Escape" && isOpen) {
         onClose();
       }
     };
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.addEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("keydown", handleEscape);
+      document.addEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = "unset";
     };
   }, [isOpen, onClose]);
 
@@ -78,7 +81,12 @@ const ReviewEditModal: React.FC<ReviewEditModalProps> = ({
             className="text-gray-400 hover:text-gray-600 transition-colors duration-200 disabled:opacity-50"
             aria-label="Close modal"
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

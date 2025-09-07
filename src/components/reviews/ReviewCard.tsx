@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import type { Review } from '../../types';
-import { useAuth } from '../../contexts/AuthContext';
-import RatingDisplay from './RatingDisplay';
+import React, { useState } from "react";
+import type { Review } from "../../types";
+import { useAuth } from "../../contexts/AuthContext";
+import RatingDisplay from "./RatingDisplay";
 
 interface ReviewCardProps {
   review: Review;
@@ -16,16 +16,16 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
   onEdit,
   onDelete,
   showBookInfo = false,
-  className = '',
+  className = "",
 }) => {
   const { user } = useAuth();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const isOwner = user?.id === review.userId;
-  const reviewDate = new Date(review.createdAt).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  const reviewDate = new Date(review.createdAt).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
   const handleDeleteClick = () => {
@@ -50,20 +50,22 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
   };
 
   return (
-    <div className={`bg-white border border-gray-200 rounded-lg p-6 shadow-sm ${className}`}>
+    <div
+      className={`bg-white border border-gray-200 rounded-lg p-6 shadow-sm ${className}`}
+    >
       {/* Header with user info and rating */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
           <div className="flex-shrink-0">
             <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
               <span className="text-blue-600 font-medium text-sm">
-                {review.user?.name?.charAt(0).toUpperCase() || 'U'}
+                {review.user?.name?.charAt(0).toUpperCase() || "U"}
               </span>
             </div>
           </div>
           <div>
             <h4 className="text-sm font-medium text-gray-900">
-              {review.user?.name || 'Anonymous User'}
+              {review.user?.name || "Anonymous User"}
             </h4>
             <p className="text-sm text-gray-500">{reviewDate}</p>
           </div>
@@ -133,7 +135,8 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
               </h3>
             </div>
             <p className="text-sm text-gray-600 mb-6">
-              Are you sure you want to delete this review? This action cannot be undone.
+              Are you sure you want to delete this review? This action cannot be
+              undone.
             </p>
             <div className="flex justify-end space-x-3">
               <button

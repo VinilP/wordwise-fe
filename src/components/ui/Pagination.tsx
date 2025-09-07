@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface PaginationProps {
   currentPage: number;
@@ -15,7 +15,7 @@ export const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
   hasNextPage,
   hasPreviousPage,
-  className = '',
+  className = "",
 }) => {
   const getVisiblePages = () => {
     const delta = 2;
@@ -31,7 +31,7 @@ export const Pagination: React.FC<PaginationProps> = ({
     }
 
     if (currentPage - delta > 2) {
-      rangeWithDots.push(1, '...');
+      rangeWithDots.push(1, "...");
     } else {
       rangeWithDots.push(1);
     }
@@ -39,7 +39,7 @@ export const Pagination: React.FC<PaginationProps> = ({
     rangeWithDots.push(...range);
 
     if (currentPage + delta < totalPages - 1) {
-      rangeWithDots.push('...', totalPages);
+      rangeWithDots.push("...", totalPages);
     } else if (totalPages > 1) {
       rangeWithDots.push(totalPages);
     }
@@ -54,8 +54,8 @@ export const Pagination: React.FC<PaginationProps> = ({
   const visiblePages = getVisiblePages();
 
   return (
-    <nav 
-      className={`flex items-center justify-center space-x-1 ${className}`} 
+    <nav
+      className={`flex items-center justify-center space-x-1 ${className}`}
       aria-label="Pagination Navigation"
       role="navigation"
     >
@@ -65,8 +65,8 @@ export const Pagination: React.FC<PaginationProps> = ({
         disabled={!hasPreviousPage}
         className={`px-3 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
           hasPreviousPage
-            ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-            : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+            ? "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+            : "text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed"
         }`}
         aria-label={`Go to previous page, page ${currentPage - 1}`}
         aria-disabled={!hasPreviousPage}
@@ -78,7 +78,7 @@ export const Pagination: React.FC<PaginationProps> = ({
       {/* Page numbers */}
       <div className="flex space-x-1" role="group" aria-label="Page numbers">
         {visiblePages.map((page, index) => {
-          if (page === '...') {
+          if (page === "...") {
             return (
               <span
                 key={`dots-${index}`}
@@ -99,11 +99,11 @@ export const Pagination: React.FC<PaginationProps> = ({
               onClick={() => onPageChange(pageNumber)}
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                 isCurrentPage
-                  ? 'bg-blue-600 text-white border border-blue-600'
-                  : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                  ? "bg-blue-600 text-white border border-blue-600"
+                  : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
               }`}
               aria-label={`Go to page ${pageNumber}`}
-              aria-current={isCurrentPage ? 'page' : undefined}
+              aria-current={isCurrentPage ? "page" : undefined}
             >
               {pageNumber}
             </button>
@@ -117,8 +117,8 @@ export const Pagination: React.FC<PaginationProps> = ({
         disabled={!hasNextPage}
         className={`px-3 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
           hasNextPage
-            ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-            : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+            ? "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+            : "text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed"
         }`}
         aria-label={`Go to next page, page ${currentPage + 1}`}
         aria-disabled={!hasNextPage}

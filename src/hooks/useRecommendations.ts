@@ -1,7 +1,27 @@
-import { useState, useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { recommendationService } from '../services';
-import type { Recommendation } from '@/types';
+import { useState, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { recommendationService } from "../services";
+
+// Type guards for error handling
+const isErrorWithMessage = (error: unknown): error is { message: string } => {
+  return (
+    error !== null &&
+    typeof error === "object" &&
+    "message" in error &&
+    typeof (error as any).message === "string"
+  );
+};
+
+const isErrorWithResponse = (
+  error: unknown,
+): error is { response: { data: { error: { message: string } } } } => {
+  return (
+    error !== null &&
+    typeof error === "object" &&
+    "response" in error &&
+    (error as any).response?.data?.error?.message
+  );
+};
 
 export const useRecommendations = () => {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -14,20 +34,23 @@ export const useRecommendations = () => {
     isError,
     error,
     refetch,
-    isFetching
+    isFetching,
   } = useQuery({
-    queryKey: ['recommendations'],
+    queryKey: ["recommendations"],
     queryFn: async () => {
-      console.log('🔄 Frontend: Fetching recommendations...');
+      console.log("🔄 Frontend: Fetching recommendations...");
       const result = await recommendationService.getRecommendations();
-      console.log('📥 Frontend: Received recommendations:', result);
+      console.log("📥 Frontend: Received recommendations:", result);
       return result;
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: unknown) => {
       // Don't retry on authentication errors
-      if (error?.message?.includes('Authentication required')) {
+      if (
+        isErrorWithMessage(error) &&
+        error.message.includes("Authentication required")
+      ) {
         return false;
       }
       // Retry up to 2 times for other errors
@@ -36,7 +59,7 @@ export const useRecommendations = () => {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     onSuccess: () => {
       setLastUpdated(new Date());
-    }
+    },
   });
 
   const handleRefresh = useCallback(async () => {
@@ -45,7 +68,7 @@ export const useRecommendations = () => {
       await recommendationService.clearCache();
       await refetch();
     } catch (error) {
-      console.error('Failed to refresh recommendations:', error);
+      console.error("Failed to refresh recommendations:", error);
       // Still try to refetch even if cache clearing fails
       await refetch();
     }
@@ -54,28 +77,28 @@ export const useRecommendations = () => {
   const handleForceRefresh = useCallback(async () => {
     try {
       // Force refresh by invalidating the query cache
-      await queryClient.invalidateQueries({ queryKey: ['recommendations'] });
+      await queryClient.invalidateQueries({ queryKey: ["recommendations"] });
       await recommendationService.clearCache();
       await refetch();
     } catch (error) {
-      console.error('Failed to force refresh recommendations:', error);
+      console.error("Failed to force refresh recommendations:", error);
       await refetch();
     }
   }, [queryClient, refetch]);
 
-  const getErrorMessage = useCallback((error: any): string => {
-    if (error?.message) {
+  const getErrorMessage = useCallback((error: unknown): string => {
+    if (isErrorWithMessage(error)) {
       return error.message;
     }
-    if (error?.response?.data?.error?.message) {
+    if (isErrorWithResponse(error)) {
       return error.response.data.error.message;
     }
-    return 'An unexpected error occurred while loading recommendations.';
+    return "An unexpected error occurred while loading recommendations.";
   }, []);
 
   return {
     recommendations: recommendationsData?.recommendations || [],
-    message: recommendationsData?.message || '',
+    message: recommendationsData?.message || "",
     isLoading,
     isError,
     error: isError ? getErrorMessage(error) : null,
@@ -83,6 +106,6 @@ export const useRecommendations = () => {
     lastUpdated,
     refresh: handleRefresh,
     forceRefresh: handleForceRefresh,
-    refetch
+    refetch,
   };
 };

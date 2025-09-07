@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import axios from 'axios';
-import { recommendationService } from '../recommendation.service';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import axios from "axios";
+import { recommendationService } from "../recommendation.service";
 
 // Mock axios
-vi.mock('axios');
+vi.mock("axios");
 const mockedAxios = vi.mocked(axios);
 
 // Mock localStorage
@@ -13,22 +13,22 @@ const localStorageMock = {
   removeItem: vi.fn(),
   clear: vi.fn(),
 };
-Object.defineProperty(window, 'localStorage', {
+Object.defineProperty(window, "localStorage", {
   value: localStorageMock,
 });
 
-describe('recommendationService', () => {
+describe("recommendationService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorageMock.getItem.mockReturnValue('mock-token');
+    localStorageMock.getItem.mockReturnValue("mock-token");
   });
 
   afterEach(() => {
     vi.resetAllMocks();
   });
 
-  describe('getRecommendations', () => {
-    it('should return recommendations successfully', async () => {
+  describe("getRecommendations", () => {
+    it("should return recommendations successfully", async () => {
       const mockResponse = {
         data: {
           success: true,
@@ -36,23 +36,23 @@ describe('recommendationService', () => {
             recommendations: [
               {
                 book: {
-                  id: '1',
-                  title: 'Test Book',
-                  author: 'Test Author',
-                  description: 'Test description',
-                  coverImageUrl: 'https://example.com/cover.jpg',
-                  genres: ['Fiction'],
+                  id: "1",
+                  title: "Test Book",
+                  author: "Test Author",
+                  description: "Test description",
+                  coverImageUrl: "https://example.com/cover.jpg",
+                  genres: ["Fiction"],
                   publishedYear: 2023,
                   averageRating: 4.5,
                   reviewCount: 10,
-                  createdAt: '2023-01-01T00:00:00Z',
-                  updatedAt: '2023-01-01T00:00:00Z',
+                  createdAt: "2023-01-01T00:00:00Z",
+                  updatedAt: "2023-01-01T00:00:00Z",
                 },
-                reason: 'Based on your preferences',
+                reason: "Based on your preferences",
                 confidence: 0.85,
               },
             ],
-            message: 'Recommendations loaded successfully',
+            message: "Recommendations loaded successfully",
           },
         },
       };
@@ -73,12 +73,12 @@ describe('recommendationService', () => {
       });
     });
 
-    it('should throw error when API response is not successful', async () => {
+    it("should throw error when API response is not successful", async () => {
       const mockResponse = {
         data: {
           success: false,
           error: {
-            message: 'Failed to get recommendations',
+            message: "Failed to get recommendations",
           },
         },
       };
@@ -92,11 +92,11 @@ describe('recommendationService', () => {
       } as any);
 
       await expect(recommendationService.getRecommendations()).rejects.toThrow(
-        'Failed to get recommendations'
+        "Failed to get recommendations",
       );
     });
 
-    it('should handle 401 authentication error', async () => {
+    it("should handle 401 authentication error", async () => {
       const error = {
         response: {
           status: 401,
@@ -112,11 +112,11 @@ describe('recommendationService', () => {
       } as any);
 
       await expect(recommendationService.getRecommendations()).rejects.toThrow(
-        'Authentication required. Please log in to get recommendations.'
+        "Authentication required. Please log in to get recommendations.",
       );
     });
 
-    it('should handle 429 rate limit error', async () => {
+    it("should handle 429 rate limit error", async () => {
       const error = {
         response: {
           status: 429,
@@ -132,17 +132,17 @@ describe('recommendationService', () => {
       } as any);
 
       await expect(recommendationService.getRecommendations()).rejects.toThrow(
-        'Too many requests. Please try again later.'
+        "Too many requests. Please try again later.",
       );
     });
 
-    it('should handle 500 service unavailable error', async () => {
+    it("should handle 500 service unavailable error", async () => {
       const error = {
         response: {
           status: 500,
           data: {
             error: {
-              code: 'SERVICE_UNAVAILABLE',
+              code: "SERVICE_UNAVAILABLE",
             },
           },
         },
@@ -157,13 +157,13 @@ describe('recommendationService', () => {
       } as any);
 
       await expect(recommendationService.getRecommendations()).rejects.toThrow(
-        'Recommendation service temporarily unavailable. Please try again later.'
+        "Recommendation service temporarily unavailable. Please try again later.",
       );
     });
 
-    it('should handle network error', async () => {
+    it("should handle network error", async () => {
       const error = {
-        code: 'NETWORK_ERROR',
+        code: "NETWORK_ERROR",
       };
 
       mockedAxios.create.mockReturnValue({
@@ -175,13 +175,13 @@ describe('recommendationService', () => {
       } as any);
 
       await expect(recommendationService.getRecommendations()).rejects.toThrow(
-        'Network error. Please check your connection and try again.'
+        "Network error. Please check your connection and try again.",
       );
     });
   });
 
-  describe('clearCache', () => {
-    it('should clear cache successfully', async () => {
+  describe("clearCache", () => {
+    it("should clear cache successfully", async () => {
       const mockResponse = {
         data: {
           success: true,
@@ -199,7 +199,7 @@ describe('recommendationService', () => {
       await expect(recommendationService.clearCache()).resolves.toBeUndefined();
     });
 
-    it('should handle 401 authentication error', async () => {
+    it("should handle 401 authentication error", async () => {
       const error = {
         response: {
           status: 401,
@@ -215,11 +215,11 @@ describe('recommendationService', () => {
       } as any);
 
       await expect(recommendationService.clearCache()).rejects.toThrow(
-        'Authentication required. Please log in to clear cache.'
+        "Authentication required. Please log in to clear cache.",
       );
     });
 
-    it('should handle 500 error', async () => {
+    it("should handle 500 error", async () => {
       const error = {
         response: {
           status: 500,
@@ -235,19 +235,19 @@ describe('recommendationService', () => {
       } as any);
 
       await expect(recommendationService.clearCache()).rejects.toThrow(
-        'Failed to clear cache. Please try again later.'
+        "Failed to clear cache. Please try again later.",
       );
     });
   });
 
-  describe('refreshRecommendations', () => {
-    it('should refresh recommendations successfully', async () => {
+  describe("refreshRecommendations", () => {
+    it("should refresh recommendations successfully", async () => {
       const mockResponse = {
         data: {
           success: true,
           data: {
             recommendations: [],
-            message: 'Fresh recommendations',
+            message: "Fresh recommendations",
           },
         },
       };
@@ -265,27 +265,29 @@ describe('recommendationService', () => {
 
       const result = await recommendationService.refreshRecommendations();
 
-      expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/recommendations/cache');
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/recommendations');
+      expect(mockAxiosInstance.delete).toHaveBeenCalledWith(
+        "/recommendations/cache",
+      );
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith("/recommendations");
       expect(result).toEqual({
         recommendations: [],
-        message: 'Fresh recommendations',
+        message: "Fresh recommendations",
       });
     });
 
-    it('should continue with recommendations even if cache clearing fails', async () => {
+    it("should continue with recommendations even if cache clearing fails", async () => {
       const mockResponse = {
         data: {
           success: true,
           data: {
             recommendations: [],
-            message: 'Recommendations loaded',
+            message: "Recommendations loaded",
           },
         },
       };
 
       const mockAxiosInstance = {
-        delete: vi.fn().mockRejectedValue(new Error('Cache clear failed')),
+        delete: vi.fn().mockRejectedValue(new Error("Cache clear failed")),
         get: vi.fn().mockResolvedValue(mockResponse),
         interceptors: {
           request: { use: vi.fn() },
@@ -295,20 +297,19 @@ describe('recommendationService', () => {
 
       mockedAxios.create.mockReturnValue(mockAxiosInstance as any);
 
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
       const result = await recommendationService.refreshRecommendations();
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to clear cache, but continuing with recommendation fetch'
+        "Failed to clear cache, but continuing with recommendation fetch",
       );
       expect(result).toEqual({
         recommendations: [],
-        message: 'Recommendations loaded',
+        message: "Recommendations loaded",
       });
 
       consoleSpy.mockRestore();
     });
   });
 });
-

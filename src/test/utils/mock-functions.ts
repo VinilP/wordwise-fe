@@ -1,8 +1,8 @@
-import { vi } from 'vitest';
+import { vi } from "vitest";
 
 // Mock function factories
 export const createMockFunction = <T extends (...args: any[]) => any>(
-  implementation?: T
+  implementation?: T,
 ): T & { mockClear: () => void; mockReset: () => void } => {
   const mockFn = vi.fn(implementation);
   return Object.assign(mockFn, {
@@ -14,16 +14,16 @@ export const createMockFunction = <T extends (...args: any[]) => any>(
 // Common mock implementations
 export const mockNavigate = createMockFunction(() => {});
 export const mockLocation = createMockFunction(() => ({
-  pathname: '/',
-  search: '',
-  hash: '',
+  pathname: "/",
+  search: "",
+  hash: "",
   state: null,
 }));
 
 // Mock router functions
 export const mockRouterFunctions = () => {
-  vi.mock('react-router-dom', async () => {
-    const actual = await vi.importActual('react-router-dom');
+  vi.mock("react-router-dom", async () => {
+    const actual = await vi.importActual("react-router-dom");
     return {
       ...actual,
       useNavigate: () => mockNavigate,
@@ -71,7 +71,7 @@ export const mockUserService = {
 
 // Mock all services
 export const mockAllServices = () => {
-  vi.mock('@/services', () => ({
+  vi.mock("@/services", () => ({
     authService: mockAuthService,
     bookService: mockBookService,
     reviewService: mockReviewService,
@@ -91,9 +91,9 @@ export const mockAllServices = () => {
 // Mock API responses
 export const mockApiResponses = {
   success: (data: any) => Promise.resolve({ data }),
-  error: (message: string, status: number = 500) => 
+  error: (message: string, status: number = 500) =>
     Promise.reject({ response: { data: { error: message }, status } }),
-  networkError: () => Promise.reject(new Error('Network Error')),
+  networkError: () => Promise.reject(new Error("Network Error")),
 };
 
 // Mock localStorage
@@ -102,10 +102,10 @@ export const mockLocalStorage = {
     const store: Record<string, string> = {};
     return store[key] || null;
   }),
-  setItem: createMockFunction((key: string, value: string) => {
+  setItem: createMockFunction((_key: string, _value: string) => {
     // Mock implementation
   }),
-  removeItem: createMockFunction((key: string) => {
+  removeItem: createMockFunction((_key: string) => {
     // Mock implementation
   }),
   clear: createMockFunction(() => {
@@ -115,22 +115,22 @@ export const mockLocalStorage = {
 
 // Mock window methods
 export const mockWindowMethods = () => {
-  Object.defineProperty(window, 'localStorage', {
+  Object.defineProperty(window, "localStorage", {
     value: mockLocalStorage,
     writable: true,
   });
 
-  Object.defineProperty(window, 'scrollTo', {
+  Object.defineProperty(window, "scrollTo", {
     value: createMockFunction(),
     writable: true,
   });
 
-  Object.defineProperty(window, 'alert', {
+  Object.defineProperty(window, "alert", {
     value: createMockFunction(),
     writable: true,
   });
 
-  Object.defineProperty(window, 'confirm', {
+  Object.defineProperty(window, "confirm", {
     value: createMockFunction(() => true),
     writable: true,
   });
@@ -151,4 +151,3 @@ export const resetAllMocks = () => {
   mockLocalStorage.removeItem.mockReset();
   mockLocalStorage.clear.mockReset();
 };
-

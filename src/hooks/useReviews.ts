@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import type { Review, UpdateReviewRequest } from '@/types';
-import { reviewService } from '../services';
+import { useState, useEffect } from "react";
+import type { Review, UpdateReviewRequest } from "@/types";
+import { reviewService } from "../services";
 
 export const useUserReviews = (userId: string | undefined) => {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -19,7 +19,7 @@ export const useUserReviews = (userId: string | undefined) => {
       const userReviews = await reviewService.getReviewsByUser(userId);
       setReviews(userReviews);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch reviews');
+      setError(err instanceof Error ? err.message : "Failed to fetch reviews");
     } finally {
       setIsLoading(false);
     }
@@ -28,10 +28,8 @@ export const useUserReviews = (userId: string | undefined) => {
   const updateReview = async (reviewId: string, data: UpdateReviewRequest) => {
     try {
       const updatedReview = await reviewService.updateReview(reviewId, data);
-      setReviews(prev => 
-        prev.map(review => 
-          review.id === reviewId ? updatedReview : review
-        )
+      setReviews((prev) =>
+        prev.map((review) => (review.id === reviewId ? updatedReview : review)),
       );
     } catch (err) {
       throw err;
@@ -41,7 +39,7 @@ export const useUserReviews = (userId: string | undefined) => {
   const deleteReview = async (reviewId: string) => {
     try {
       await reviewService.deleteReview(reviewId);
-      setReviews(prev => prev.filter(review => review.id !== reviewId));
+      setReviews((prev) => prev.filter((review) => review.id !== reviewId));
     } catch (err) {
       throw err;
     }
@@ -78,7 +76,7 @@ export const useBookReviews = (bookId: string | undefined) => {
       const bookReviews = await reviewService.getReviewsByBook(bookId);
       setReviews(bookReviews);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch reviews');
+      setError(err instanceof Error ? err.message : "Failed to fetch reviews");
     } finally {
       setIsLoading(false);
     }

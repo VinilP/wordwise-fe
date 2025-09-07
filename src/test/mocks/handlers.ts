@@ -1,53 +1,53 @@
-import { http, HttpResponse } from 'msw';
-import { Book, Review, User, Recommendation } from '@/types';
+import { http, HttpResponse } from "msw";
+import { Book, Review, User, Recommendation } from "@/types";
 
 // Mock data
 const mockUser: User = {
-  id: '1',
-  email: 'test@example.com',
-  name: 'Test User',
-  createdAt: '2023-01-01T00:00:00Z',
-  updatedAt: '2023-01-01T00:00:00Z',
+  id: "1",
+  email: "test@example.com",
+  name: "Test User",
+  createdAt: "2023-01-01T00:00:00Z",
+  updatedAt: "2023-01-01T00:00:00Z",
 };
 
 const mockBooks: Book[] = [
   {
-    id: '1',
-    title: 'The Great Gatsby',
-    author: 'F. Scott Fitzgerald',
-    description: 'A classic American novel about the Jazz Age.',
-    coverImageUrl: 'https://example.com/gatsby.jpg',
-    genres: ['Fiction', 'Classic', 'Drama'],
+    id: "1",
+    title: "The Great Gatsby",
+    author: "F. Scott Fitzgerald",
+    description: "A classic American novel about the Jazz Age.",
+    coverImageUrl: "https://example.com/gatsby.jpg",
+    genres: ["Fiction", "Classic", "Drama"],
     publishedYear: 1925,
     averageRating: 4.2,
     reviewCount: 150,
-    createdAt: '2023-01-01T00:00:00Z',
-    updatedAt: '2023-01-01T00:00:00Z',
+    createdAt: "2023-01-01T00:00:00Z",
+    updatedAt: "2023-01-01T00:00:00Z",
   },
   {
-    id: '2',
-    title: 'To Kill a Mockingbird',
-    author: 'Harper Lee',
-    description: 'A gripping tale of racial injustice and childhood innocence.',
-    coverImageUrl: 'https://example.com/mockingbird.jpg',
-    genres: ['Fiction', 'Classic', 'Drama'],
+    id: "2",
+    title: "To Kill a Mockingbird",
+    author: "Harper Lee",
+    description: "A gripping tale of racial injustice and childhood innocence.",
+    coverImageUrl: "https://example.com/mockingbird.jpg",
+    genres: ["Fiction", "Classic", "Drama"],
     publishedYear: 1960,
     averageRating: 4.5,
     reviewCount: 200,
-    createdAt: '2023-01-01T00:00:00Z',
-    updatedAt: '2023-01-01T00:00:00Z',
+    createdAt: "2023-01-01T00:00:00Z",
+    updatedAt: "2023-01-01T00:00:00Z",
   },
 ];
 
 const mockReviews: Review[] = [
   {
-    id: '1',
-    bookId: '1',
-    userId: '1',
+    id: "1",
+    bookId: "1",
+    userId: "1",
     rating: 5,
-    comment: 'Amazing book!',
-    createdAt: '2023-01-01T00:00:00Z',
-    updatedAt: '2023-01-01T00:00:00Z',
+    comment: "Amazing book!",
+    createdAt: "2023-01-01T00:00:00Z",
+    updatedAt: "2023-01-01T00:00:00Z",
     user: mockUser,
     book: mockBooks[0],
   },
@@ -55,12 +55,12 @@ const mockReviews: Review[] = [
 
 const mockRecommendations: Recommendation[] = [
   {
-    id: '1',
-    userId: '1',
-    bookId: '2',
-    reason: 'Based on your love for classic literature',
+    id: "1",
+    userId: "1",
+    bookId: "2",
+    reason: "Based on your love for classic literature",
     score: 0.95,
-    createdAt: '2023-01-01T00:00:00Z',
+    createdAt: "2023-01-01T00:00:00Z",
     book: mockBooks[1],
   },
 ];
@@ -68,58 +68,58 @@ const mockRecommendations: Recommendation[] = [
 // API handlers
 export const handlers = [
   // Auth endpoints
-  http.post('http://localhost:3001/api/auth/login', () => {
+  http.post("http://localhost:3001/api/auth/login", () => {
     return HttpResponse.json({
       user: mockUser,
-      token: 'mock-jwt-token',
-      refreshToken: 'mock-refresh-token',
+      token: "mock-jwt-token",
+      refreshToken: "mock-refresh-token",
     });
   }),
 
-  http.post('http://localhost:3001/api/auth/register', () => {
+  http.post("http://localhost:3001/api/auth/register", () => {
     return HttpResponse.json({
       user: mockUser,
-      token: 'mock-jwt-token',
-      refreshToken: 'mock-refresh-token',
+      token: "mock-jwt-token",
+      refreshToken: "mock-refresh-token",
     });
   }),
 
-  http.post('http://localhost:3001/api/auth/refresh', () => {
+  http.post("http://localhost:3001/api/auth/refresh", () => {
     return HttpResponse.json({
-      token: 'new-mock-jwt-token',
-      refreshToken: 'new-mock-refresh-token',
+      token: "new-mock-jwt-token",
+      refreshToken: "new-mock-refresh-token",
     });
   }),
 
-  http.get('http://localhost:3001/api/auth/me', () => {
+  http.get("http://localhost:3001/api/auth/me", () => {
     return HttpResponse.json(mockUser);
   }),
 
-  http.post('http://localhost:3001/api/auth/logout', () => {
-    return HttpResponse.json({ message: 'Logged out successfully' });
+  http.post("http://localhost:3001/api/auth/logout", () => {
+    return HttpResponse.json({ message: "Logged out successfully" });
   }),
 
   // Books endpoints
-  http.get('http://localhost:3001/api/books', ({ request }) => {
+  http.get("http://localhost:3001/api/books", ({ request }) => {
     const url = new URL(request.url);
-    const search = url.searchParams.get('search');
-    const genre = url.searchParams.get('genre');
-    const page = url.searchParams.get('page') || '1';
-    const limit = url.searchParams.get('limit') || '10';
+    const search = url.searchParams.get("search");
+    const genre = url.searchParams.get("genre");
+    const page = url.searchParams.get("page") || "1";
+    const limit = url.searchParams.get("limit") || "10";
 
     let filteredBooks = mockBooks;
 
     if (search) {
       filteredBooks = filteredBooks.filter(
-        book => 
+        (book) =>
           book.title.toLowerCase().includes(search.toLowerCase()) ||
-          book.author.toLowerCase().includes(search.toLowerCase())
+          book.author.toLowerCase().includes(search.toLowerCase()),
       );
     }
 
     if (genre) {
-      filteredBooks = filteredBooks.filter(book => 
-        book.genres.some(g => g.toLowerCase() === genre.toLowerCase())
+      filteredBooks = filteredBooks.filter((book) =>
+        book.genres.some((g) => g.toLowerCase() === genre.toLowerCase()),
       );
     }
 
@@ -142,19 +142,19 @@ export const handlers = [
   }),
 
   // Handle search endpoint
-  http.get('http://localhost:3001/api/books/search', ({ request }) => {
+  http.get("http://localhost:3001/api/books/search", ({ request }) => {
     const url = new URL(request.url);
-    const q = url.searchParams.get('q');
-    const page = url.searchParams.get('page') || '1';
-    const limit = url.searchParams.get('limit') || '10';
+    const q = url.searchParams.get("q");
+    const page = url.searchParams.get("page") || "1";
+    const limit = url.searchParams.get("limit") || "10";
 
     let filteredBooks = mockBooks;
 
     if (q) {
       filteredBooks = filteredBooks.filter(
-        book => 
+        (book) =>
           book.title.toLowerCase().includes(q.toLowerCase()) ||
-          book.author.toLowerCase().includes(q.toLowerCase())
+          book.author.toLowerCase().includes(q.toLowerCase()),
       );
     }
 
@@ -176,10 +176,10 @@ export const handlers = [
     });
   }),
 
-  http.get('http://localhost:3001/api/books/:id', ({ params }) => {
-    const book = mockBooks.find(b => b.id === params.id);
+  http.get("http://localhost:3001/api/books/:id", ({ params }) => {
+    const book = mockBooks.find((b) => b.id === params.id);
     if (!book) {
-      return HttpResponse.json({ error: 'Book not found' }, { status: 404 });
+      return HttpResponse.json({ error: "Book not found" }, { status: 404 });
     }
     return HttpResponse.json({
       success: true,
@@ -187,7 +187,7 @@ export const handlers = [
     });
   }),
 
-  http.get('http://localhost:3001/api/books/popular', () => {
+  http.get("http://localhost:3001/api/books/popular", () => {
     return HttpResponse.json({
       success: true,
       data: {
@@ -197,21 +197,25 @@ export const handlers = [
   }),
 
   // Reviews endpoints
-  http.get('http://localhost:3001/api/reviews', ({ request }) => {
+  http.get("http://localhost:3001/api/reviews", ({ request }) => {
     const url = new URL(request.url);
-    const bookId = url.searchParams.get('bookId');
-    const userId = url.searchParams.get('userId');
-    const page = url.searchParams.get('page') || '1';
-    const limit = url.searchParams.get('limit') || '10';
+    const bookId = url.searchParams.get("bookId");
+    const userId = url.searchParams.get("userId");
+    const page = url.searchParams.get("page") || "1";
+    const limit = url.searchParams.get("limit") || "10";
 
     let filteredReviews = mockReviews;
 
     if (bookId) {
-      filteredReviews = filteredReviews.filter(review => review.bookId === bookId);
+      filteredReviews = filteredReviews.filter(
+        (review) => review.bookId === bookId,
+      );
     }
 
     if (userId) {
-      filteredReviews = filteredReviews.filter(review => review.userId === userId);
+      filteredReviews = filteredReviews.filter(
+        (review) => review.userId === userId,
+      );
     }
 
     const startIndex = (parseInt(page) - 1) * parseInt(limit);
@@ -229,101 +233,107 @@ export const handlers = [
     });
   }),
 
-  http.post('http://localhost:3001/api/reviews', () => {
+  http.post("http://localhost:3001/api/reviews", () => {
     const newReview: Review = {
-      id: '2',
-      bookId: '1',
-      userId: '1',
+      id: "2",
+      bookId: "1",
+      userId: "1",
       rating: 4,
-      comment: 'Great book!',
-      createdAt: '2023-01-02T00:00:00Z',
-      updatedAt: '2023-01-02T00:00:00Z',
+      comment: "Great book!",
+      createdAt: "2023-01-02T00:00:00Z",
+      updatedAt: "2023-01-02T00:00:00Z",
       user: mockUser,
       book: mockBooks[0],
     };
     return HttpResponse.json(newReview, { status: 201 });
   }),
 
-  http.put('http://localhost:3001/api/reviews/:id', ({ params }) => {
-    const review = mockReviews.find(r => r.id === params.id);
+  http.put("http://localhost:3001/api/reviews/:id", ({ params }) => {
+    const review = mockReviews.find((r) => r.id === params.id);
     if (!review) {
-      return HttpResponse.json({ error: 'Review not found' }, { status: 404 });
+      return HttpResponse.json({ error: "Review not found" }, { status: 404 });
     }
-    return HttpResponse.json({ ...review, comment: 'Updated comment' });
+    return HttpResponse.json({ ...review, comment: "Updated comment" });
   }),
 
-  http.delete('http://localhost:3001/api/reviews/:id', ({ params }) => {
-    const review = mockReviews.find(r => r.id === params.id);
+  http.delete("http://localhost:3001/api/reviews/:id", ({ params }) => {
+    const review = mockReviews.find((r) => r.id === params.id);
     if (!review) {
-      return HttpResponse.json({ error: 'Review not found' }, { status: 404 });
+      return HttpResponse.json({ error: "Review not found" }, { status: 404 });
     }
-    return HttpResponse.json({ message: 'Review deleted successfully' });
+    return HttpResponse.json({ message: "Review deleted successfully" });
   }),
 
   // Recommendations endpoints
-  http.get('http://localhost:3001/api/recommendations', () => {
+  http.get("http://localhost:3001/api/recommendations", () => {
     return HttpResponse.json({
       recommendations: mockRecommendations,
     });
   }),
 
-  http.get('http://localhost:3001/api/recommendations/user/:userId', () => {
+  http.get("http://localhost:3001/api/recommendations/user/:userId", () => {
     return HttpResponse.json({
       recommendations: mockRecommendations,
     });
   }),
 
   // User endpoints
-  http.get('http://localhost:3001/api/users/:id', ({ params }) => {
-    if (params.id === '1') {
+  http.get("http://localhost:3001/api/users/:id", ({ params }) => {
+    if (params.id === "1") {
       return HttpResponse.json(mockUser);
     }
-    return HttpResponse.json({ error: 'User not found' }, { status: 404 });
+    return HttpResponse.json({ error: "User not found" }, { status: 404 });
   }),
 
-  http.put('http://localhost:3001/api/users/:id', ({ params }) => {
-    if (params.id === '1') {
-      return HttpResponse.json({ ...mockUser, name: 'Updated User' });
+  http.put("http://localhost:3001/api/users/:id", ({ params }) => {
+    if (params.id === "1") {
+      return HttpResponse.json({ ...mockUser, name: "Updated User" });
     }
-    return HttpResponse.json({ error: 'User not found' }, { status: 404 });
+    return HttpResponse.json({ error: "User not found" }, { status: 404 });
   }),
 
   // Favorites endpoints
-  http.get('http://localhost:3001/api/users/:id/favorites', () => {
+  http.get("http://localhost:3001/api/users/:id/favorites", () => {
     return HttpResponse.json({
       books: mockBooks,
     });
   }),
 
-  http.post('http://localhost:3001/api/users/:id/favorites', () => {
-    return HttpResponse.json({ message: 'Book added to favorites' });
+  http.post("http://localhost:3001/api/users/:id/favorites", () => {
+    return HttpResponse.json({ message: "Book added to favorites" });
   }),
 
-  http.delete('http://localhost:3001/api/users/:id/favorites/:bookId', () => {
-    return HttpResponse.json({ message: 'Book removed from favorites' });
+  http.delete("http://localhost:3001/api/users/:id/favorites/:bookId", () => {
+    return HttpResponse.json({ message: "Book removed from favorites" });
   }),
 
   // Error handlers
-  http.get('/api/error', () => {
-    return HttpResponse.json({ error: 'Internal server error' }, { status: 500 });
+  http.get("/api/error", () => {
+    return HttpResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }),
 
-  http.get('/api/not-found', () => {
-    return HttpResponse.json({ error: 'Not found' }, { status: 404 });
+  http.get("/api/not-found", () => {
+    return HttpResponse.json({ error: "Not found" }, { status: 404 });
   }),
 ];
 
 // Error handlers for testing error scenarios
 export const errorHandlers = [
-  http.get('http://localhost:3001/api/books', () => {
-    return HttpResponse.json({ error: 'Failed to fetch books' }, { status: 500 });
+  http.get("http://localhost:3001/api/books", () => {
+    return HttpResponse.json(
+      { error: "Failed to fetch books" },
+      { status: 500 },
+    );
   }),
 
-  http.post('http://localhost:3001/api/auth/login', () => {
-    return HttpResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+  http.post("http://localhost:3001/api/auth/login", () => {
+    return HttpResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }),
 
-  http.get('http://localhost:3001/api/books/:id', () => {
-    return HttpResponse.json({ error: 'Book not found' }, { status: 404 });
+  http.get("http://localhost:3001/api/books/:id", () => {
+    return HttpResponse.json({ error: "Book not found" }, { status: 404 });
   }),
 ];

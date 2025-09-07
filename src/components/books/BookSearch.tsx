@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 // import { SearchFilters } from '../../types';
 
 // Temporary type definition
@@ -18,28 +18,34 @@ interface BookSearchProps {
 export const BookSearch: React.FC<BookSearchProps> = ({
   onSearch,
   initialFilters = {},
-  className = '',
+  className = "",
 }) => {
-  const [query, setQuery] = useState(initialFilters.query || '');
-  const [selectedGenres, setSelectedGenres] = useState<string[]>(initialFilters.genres || []);
-  const [minRating, setMinRating] = useState<number | undefined>(initialFilters.minRating);
-  const [publishedYear, setPublishedYear] = useState<number | undefined>(initialFilters.publishedYear);
+  const [query, setQuery] = useState(initialFilters.query || "");
+  const [selectedGenres, setSelectedGenres] = useState<string[]>(
+    initialFilters.genres || [],
+  );
+  const [minRating, setMinRating] = useState<number | undefined>(
+    initialFilters.minRating,
+  );
+  const [publishedYear, setPublishedYear] = useState<number | undefined>(
+    initialFilters.publishedYear,
+  );
   const [showFilters, setShowFilters] = useState(false);
 
   // Available genres (in a real app, this might come from an API)
   const availableGenres = [
-    'Fiction',
-    'Non-Fiction',
-    'Mystery',
-    'Romance',
-    'Science Fiction',
-    'Fantasy',
-    'Biography',
-    'History',
-    'Self-Help',
-    'Business',
-    'Technology',
-    'Health',
+    "Fiction",
+    "Non-Fiction",
+    "Mystery",
+    "Romance",
+    "Science Fiction",
+    "Fantasy",
+    "Biography",
+    "History",
+    "Self-Help",
+    "Business",
+    "Technology",
+    "Health",
   ];
 
   // Debounced search effect
@@ -53,7 +59,7 @@ export const BookSearch: React.FC<BookSearchProps> = ({
 
   const handleSearch = () => {
     const filters: SearchFilters = {
-      query: query.trim() || '',
+      query: query.trim() || "",
       genres: selectedGenres.length > 0 ? selectedGenres : undefined,
       minRating: minRating || undefined,
       publishedYear: publishedYear || undefined,
@@ -62,24 +68,27 @@ export const BookSearch: React.FC<BookSearchProps> = ({
   };
 
   const handleGenreToggle = (genre: string) => {
-    setSelectedGenres(prev =>
-      prev.includes(genre)
-        ? prev.filter(g => g !== genre)
-        : [...prev, genre]
+    setSelectedGenres((prev) =>
+      prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre],
     );
   };
 
   const clearFilters = () => {
-    setQuery('');
+    setQuery("");
     setSelectedGenres([]);
     setMinRating(undefined);
     setPublishedYear(undefined);
   };
 
-  const hasActiveFilters = query || selectedGenres.length > 0 || minRating || publishedYear;
+  const hasActiveFilters =
+    query || selectedGenres.length > 0 || minRating || publishedYear;
 
   return (
-    <div className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`} role="search" aria-label="Book search and filters">
+    <div
+      className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`}
+      role="search"
+      aria-label="Book search and filters"
+    >
       {/* Header with search and filter controls */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -137,7 +146,8 @@ export const BookSearch: React.FC<BookSearchProps> = ({
               </svg>
             </button>
             <div id="search-help" className="sr-only">
-              Type to search for books by title or author. Results will update automatically.
+              Type to search for books by title or author. Results will update
+              automatically.
             </div>
           </div>
 
@@ -155,7 +165,8 @@ export const BookSearch: React.FC<BookSearchProps> = ({
                   )}
                   {selectedGenres.length > 0 && (
                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      {selectedGenres.length} genre{selectedGenres.length > 1 ? 's' : ''}
+                      {selectedGenres.length} genre
+                      {selectedGenres.length > 1 ? "s" : ""}
                     </span>
                   )}
                   {minRating && (
@@ -179,7 +190,7 @@ export const BookSearch: React.FC<BookSearchProps> = ({
                 className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-3 py-2 border border-gray-300 hover:border-gray-400"
                 aria-expanded={showFilters}
                 aria-controls="filters-panel"
-                aria-label={`${showFilters ? 'Hide' : 'Show'} search filters`}
+                aria-label={`${showFilters ? "Hide" : "Show"} search filters`}
               >
                 <svg
                   className="h-4 w-4"
@@ -188,12 +199,27 @@ export const BookSearch: React.FC<BookSearchProps> = ({
                   viewBox="0 0 24 24"
                   aria-hidden="true"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                  />
                 </svg>
                 <span>Filters</span>
                 {hasActiveFilters && (
-                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full" aria-label="Active filters">
-                    {[query, selectedGenres.length, minRating, publishedYear].filter(Boolean).length}
+                  <span
+                    className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
+                    aria-label="Active filters"
+                  >
+                    {
+                      [
+                        query,
+                        selectedGenres.length,
+                        minRating,
+                        publishedYear,
+                      ].filter(Boolean).length
+                    }
                   </span>
                 )}
               </button>
@@ -214,7 +240,7 @@ export const BookSearch: React.FC<BookSearchProps> = ({
 
       {/* Filters panel */}
       {showFilters && (
-        <div 
+        <div
           id="filters-panel"
           className="p-4"
           role="region"
@@ -227,18 +253,22 @@ export const BookSearch: React.FC<BookSearchProps> = ({
                 <legend className="block text-sm font-medium text-gray-700 mb-3">
                   Genres
                 </legend>
-                <div className="flex flex-wrap gap-2" role="group" aria-label="Select genres">
+                <div
+                  className="flex flex-wrap gap-2"
+                  role="group"
+                  aria-label="Select genres"
+                >
                   {availableGenres.map((genre) => (
                     <button
                       key={genre}
                       onClick={() => handleGenreToggle(genre)}
                       className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                         selectedGenres.includes(genre)
-                          ? 'bg-blue-600 text-white shadow-md'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                          ? "bg-blue-600 text-white shadow-md"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
                       }`}
                       aria-pressed={selectedGenres.includes(genre)}
-                      aria-label={`${selectedGenres.includes(genre) ? 'Remove' : 'Add'} ${genre} filter`}
+                      aria-label={`${selectedGenres.includes(genre) ? "Remove" : "Add"} ${genre} filter`}
                     >
                       {genre}
                     </button>
@@ -251,13 +281,20 @@ export const BookSearch: React.FC<BookSearchProps> = ({
             <div className="space-y-4">
               {/* Rating filter */}
               <div>
-                <label htmlFor="min-rating" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="min-rating"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Minimum Rating
                 </label>
                 <select
                   id="min-rating"
-                  value={minRating || ''}
-                  onChange={(e) => setMinRating(e.target.value ? Number(e.target.value) : undefined)}
+                  value={minRating || ""}
+                  onChange={(e) =>
+                    setMinRating(
+                      e.target.value ? Number(e.target.value) : undefined,
+                    )
+                  }
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white"
                   aria-label="Select minimum rating filter"
                 >
@@ -272,7 +309,10 @@ export const BookSearch: React.FC<BookSearchProps> = ({
 
               {/* Published year filter */}
               <div>
-                <label htmlFor="published-year" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="published-year"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Published Year
                 </label>
                 <input
@@ -281,8 +321,12 @@ export const BookSearch: React.FC<BookSearchProps> = ({
                   placeholder="e.g., 2020"
                   min="1000"
                   max={new Date().getFullYear()}
-                  value={publishedYear || ''}
-                  onChange={(e) => setPublishedYear(e.target.value ? Number(e.target.value) : undefined)}
+                  value={publishedYear || ""}
+                  onChange={(e) =>
+                    setPublishedYear(
+                      e.target.value ? Number(e.target.value) : undefined,
+                    )
+                  }
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   aria-label="Enter published year filter"
                 />

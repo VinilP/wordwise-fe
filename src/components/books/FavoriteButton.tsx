@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { userService } from '@/services/user.service';
-import type { Book } from '@/types';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { userService } from "@/services/user.service";
+import type { Book } from "@/types";
 
 interface FavoriteButtonProps {
   book: Book;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   showText?: boolean;
   onFavoriteChange?: (isFavorite: boolean) => void;
 }
 
 const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   book,
-  size = 'md',
+  size = "md",
   showText = false,
   onFavoriteChange,
 }) => {
@@ -33,13 +33,13 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       const status = await userService.checkFavoriteStatus(book.id);
       setIsFavorite(status);
     } catch (err) {
-      console.error('Failed to check favorite status:', err);
+      console.error("Failed to check favorite status:", err);
     }
   };
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      setError('Please log in to add favorites');
+      setError("Please log in to add favorites");
       return;
     }
 
@@ -56,9 +56,11 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
         setIsFavorite(true);
         onFavoriteChange?.(true);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to update favorites');
-      console.error('Failed to toggle favorite:', err);
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Failed to update favorites",
+      );
+      console.error("Failed to toggle favorite:", err);
     } finally {
       setIsLoading(false);
     }
@@ -78,15 +80,15 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   }
 
   const sizeClasses = {
-    sm: 'p-1',
-    md: 'p-2',
-    lg: 'p-3',
+    sm: "p-1",
+    md: "p-2",
+    lg: "p-3",
   };
 
   const iconSizes = {
-    sm: 'w-4 h-4',
-    md: 'w-5 h-5',
-    lg: 'w-6 h-6',
+    sm: "w-4 h-4",
+    md: "w-5 h-5",
+    lg: "w-6 h-6",
   };
 
   return (
@@ -97,19 +99,20 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
         className={`
           flex items-center gap-2 transition-all duration-200 rounded-lg
           ${sizeClasses[size]}
-          ${isFavorite 
-            ? 'text-red-500 hover:text-red-600' 
-            : 'text-gray-400 hover:text-red-500'
+          ${
+            isFavorite
+              ? "text-red-500 hover:text-red-600"
+              : "text-gray-400 hover:text-red-500"
           }
-          ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}
+          ${isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}
         `}
-        title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+        title={isFavorite ? "Remove from favorites" : "Add to favorites"}
         data-testid="favorite-button"
       >
         <HeartIcon filled={isFavorite} size={size} />
         {showText && (
           <span className="text-sm font-medium">
-            {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+            {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
           </span>
         )}
         {isLoading && (
@@ -132,7 +135,7 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
           </div>
         )}
       </button>
-      
+
       {error && (
         <p className="text-xs text-red-500 mt-1 text-center max-w-32">
           {error}
@@ -144,14 +147,14 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
 
 interface HeartIconProps {
   filled: boolean;
-  size: 'sm' | 'md' | 'lg';
+  size: "sm" | "md" | "lg";
 }
 
 const HeartIcon: React.FC<HeartIconProps> = ({ filled, size }) => {
   const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-5 h-5',
-    lg: 'w-6 h-6',
+    sm: "w-4 h-4",
+    md: "w-5 h-5",
+    lg: "w-6 h-6",
   };
 
   if (filled) {
@@ -190,4 +193,3 @@ const HeartIcon: React.FC<HeartIconProps> = ({ filled, size }) => {
 };
 
 export default FavoriteButton;
-

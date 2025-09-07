@@ -1,74 +1,78 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { RecommendationErrorBoundary } from '../RecommendationErrorBoundary';
+import { render, screen, fireEvent } from "@testing-library/react";
+import { RecommendationErrorBoundary } from "../RecommendationErrorBoundary";
 
 // Mock component that throws an error
 const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
   if (shouldThrow) {
-    throw new Error('Test error');
+    throw new Error("Test error");
   }
   return <div>No error</div>;
 };
 
-describe('RecommendationErrorBoundary', () => {
+describe("RecommendationErrorBoundary", () => {
   beforeEach(() => {
     // Suppress console.error for these tests
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  it('renders children when there is no error', () => {
+  it("renders children when there is no error", () => {
     render(
       <RecommendationErrorBoundary>
         <ThrowError shouldThrow={false} />
-      </RecommendationErrorBoundary>
+      </RecommendationErrorBoundary>,
     );
 
-    expect(screen.getByText('No error')).toBeInTheDocument();
+    expect(screen.getByText("No error")).toBeInTheDocument();
   });
 
-  it('renders error UI when there is an error', () => {
+  it("renders error UI when there is an error", () => {
     render(
       <RecommendationErrorBoundary>
         <ThrowError shouldThrow={true} />
-      </RecommendationErrorBoundary>
+      </RecommendationErrorBoundary>,
     );
 
-    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
-    expect(screen.getByText('We encountered an unexpected error while loading your recommendations.')).toBeInTheDocument();
+    expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "We encountered an unexpected error while loading your recommendations.",
+      ),
+    ).toBeInTheDocument();
   });
 
-  it('renders custom fallback when provided', () => {
+  it("renders custom fallback when provided", () => {
     const customFallback = <div>Custom error message</div>;
-    
+
     render(
       <RecommendationErrorBoundary fallback={customFallback}>
         <ThrowError shouldThrow={true} />
-      </RecommendationErrorBoundary>
+      </RecommendationErrorBoundary>,
     );
 
-    expect(screen.getByText('Custom error message')).toBeInTheDocument();
+    expect(screen.getByText("Custom error message")).toBeInTheDocument();
   });
 
-  it('calls retry function when Try Again button is clicked', () => {
+  it("calls retry function when Try Again button is clicked", () => {
     render(
       <RecommendationErrorBoundary>
         <ThrowError shouldThrow={true} />
-      </RecommendationErrorBoundary>
+      </RecommendationErrorBoundary>,
     );
 
-    const tryAgainButton = screen.getByText('Try Again');
+    const tryAgainButton = screen.getByText("Try Again");
     fireEvent.click(tryAgainButton);
 
     // After clicking retry, the error boundary should reset and render children
-    expect(screen.getByText('No error')).toBeInTheDocument();
+    expect(screen.getByText("No error")).toBeInTheDocument();
   });
 
-  it('reloads page when Refresh Page button is clicked', () => {
+  it("reloads page when Refresh Page button is clicked", () => {
     const mockReload = jest.fn();
-    Object.defineProperty(window, 'location', {
+    Object.defineProperty(window, "location", {
       value: { reload: mockReload },
       writable: true,
     });
@@ -76,60 +80,63 @@ describe('RecommendationErrorBoundary', () => {
     render(
       <RecommendationErrorBoundary>
         <ThrowError shouldThrow={true} />
-      </RecommendationErrorBoundary>
+      </RecommendationErrorBoundary>,
     );
 
-    const refreshButton = screen.getByText('Refresh Page');
+    const refreshButton = screen.getByText("Refresh Page");
     fireEvent.click(refreshButton);
 
     expect(mockReload).toHaveBeenCalledTimes(1);
   });
 
-  it('displays error details in development mode', () => {
+  it("displays error details in development mode", () => {
     const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'development';
+    process.env.NODE_ENV = "development";
 
     render(
       <RecommendationErrorBoundary>
         <ThrowError shouldThrow={true} />
-      </RecommendationErrorBoundary>
+      </RecommendationErrorBoundary>,
     );
 
-    expect(screen.getByText('Error Details (Development)')).toBeInTheDocument();
-    expect(screen.getByText('Error: Test error')).toBeInTheDocument();
+    expect(screen.getByText("Error Details (Development)")).toBeInTheDocument();
+    expect(screen.getByText("Error: Test error")).toBeInTheDocument();
 
     process.env.NODE_ENV = originalEnv;
   });
 
-  it('does not display error details in production mode', () => {
+  it("does not display error details in production mode", () => {
     const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'production';
+    process.env.NODE_ENV = "production";
 
     render(
       <RecommendationErrorBoundary>
         <ThrowError shouldThrow={true} />
-      </RecommendationErrorBoundary>
+      </RecommendationErrorBoundary>,
     );
 
-    expect(screen.queryByText('Error Details (Development)')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Error Details (Development)"),
+    ).not.toBeInTheDocument();
 
     process.env.NODE_ENV = originalEnv;
   });
 
-  it('logs error to console', () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  it("logs error to console", () => {
+    const consoleSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     render(
       <RecommendationErrorBoundary>
         <ThrowError shouldThrow={true} />
-      </RecommendationErrorBoundary>
+      </RecommendationErrorBoundary>,
     );
 
     expect(consoleSpy).toHaveBeenCalledWith(
-      'Recommendation Error Boundary caught an error:',
+      "Recommendation Error Boundary caught an error:",
       expect.any(Error),
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 });
-

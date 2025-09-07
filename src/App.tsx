@@ -1,15 +1,30 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { LoginForm, RegisterForm, ProtectedRoute } from '@/components/auth';
-import AppLayout from '@/components/layout/AppLayout';
-import Dashboard from '@/components/layout/Dashboard';
-import { HomePage, UserRecommendationsPage } from '@/components/pages';
-import { TabbedRecommendationsPage } from '@/pages/recommendations/TabbedRecommendationsPage';
-import { BooksPage, BookDetailPage } from '@/pages/books';
-import { ProfilePage } from '@/pages/profile';
-import { HowItWorksPage, PrivacyPage, TermsPage, CookiePage, AboutPage, ContactPage, HelpCenterPage, FAQPage, SupportPage } from '@/pages';
-import ScrollToTop from '@/components/ScrollToTop';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { LoginForm, RegisterForm, ProtectedRoute } from "@/components/auth";
+import AppLayout from "@/components/layout/AppLayout";
+import Dashboard from "@/components/layout/Dashboard";
+import { HomePage } from "@/components/pages";
+import { TabbedRecommendationsPage } from "@/pages/recommendations/TabbedRecommendationsPage";
+import { BooksPage, BookDetailPage } from "@/pages/books";
+import { ProfilePage } from "@/pages/profile";
+import {
+  HowItWorksPage,
+  PrivacyPage,
+  TermsPage,
+  CookiePage,
+  AboutPage,
+  ContactPage,
+  HelpCenterPage,
+  FAQPage,
+  SupportPage,
+} from "@/pages";
+import ScrollToTop from "@/components/ScrollToTop";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -40,14 +55,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-                      <Route
-          path="/recommendations"
-          element={
-            <ProtectedRoute>
-              <TabbedRecommendationsPage />
-            </ProtectedRoute>
-          }
-        />
+              <Route
+                path="/recommendations"
+                element={
+                  <ProtectedRoute>
+                    <TabbedRecommendationsPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/profile"
                 element={

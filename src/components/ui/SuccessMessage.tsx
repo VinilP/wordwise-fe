@@ -1,26 +1,26 @@
-import React from 'react';
+import React from "react";
 
 interface SuccessMessageProps {
   message: string;
   id?: string;
   className?: string;
-  variant?: 'default' | 'inline' | 'banner';
+  variant?: "default" | "inline" | "banner";
   onDismiss?: () => void;
 }
 
 export const SuccessMessage: React.FC<SuccessMessageProps> = ({
   message,
   id,
-  className = '',
-  variant = 'default',
+  className = "",
+  variant = "default",
   onDismiss,
 }) => {
-  const baseClasses = 'text-green-600';
-  
+  const baseClasses = "text-green-600";
+
   const variantClasses = {
-    default: 'text-sm',
-    inline: 'text-sm inline',
-    banner: 'text-sm bg-green-50 border border-green-200 rounded-md p-3',
+    default: "text-sm",
+    inline: "text-sm inline",
+    banner: "text-sm bg-green-50 border border-green-200 rounded-md p-3",
   };
 
   const icon = (
@@ -62,7 +62,7 @@ export const SuccessMessage: React.FC<SuccessMessageProps> = ({
     </button>
   );
 
-  if (variant === 'banner') {
+  if (variant === "banner") {
     return (
       <div
         id={id}
@@ -71,9 +71,7 @@ export const SuccessMessage: React.FC<SuccessMessageProps> = ({
         aria-live="polite"
       >
         <div className="flex">
-          <div className="flex-shrink-0">
-            {icon}
-          </div>
+          <div className="flex-shrink-0">{icon}</div>
           <div className="ml-3 flex-1">
             <p className="font-medium">Success</p>
             <p className="mt-1">{message}</p>
@@ -95,4 +93,3 @@ export const SuccessMessage: React.FC<SuccessMessageProps> = ({
     </p>
   );
 };
-

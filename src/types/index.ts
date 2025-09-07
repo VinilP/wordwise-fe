@@ -127,7 +127,7 @@ export interface UserFavorite {
 export interface ApiError {
   message: string;
   code?: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 // Recommendation types

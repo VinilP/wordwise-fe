@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { BookCard } from './BookCard';
-import { BookSearch } from './BookSearch';
-import { Pagination } from '../ui/Pagination';
-import { ErrorMessage } from '../ui/ErrorMessage';
-import { BookCardSkeleton } from '../ui/BookCardSkeleton';
-import { bookService } from '../../services';
-import { useResponsive } from '../../hooks/useAccessibility';
-import type { SearchFilters, PaginationParams } from '@/types';
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { BookCard } from "./BookCard";
+import { BookSearch } from "./BookSearch";
+import { Pagination } from "../ui/Pagination";
+import { ErrorMessage } from "../ui/ErrorMessage";
+import { BookCardSkeleton } from "../ui/BookCardSkeleton";
+import { bookService } from "../../services";
+import { useResponsive } from "../../hooks/useAccessibility";
+import type { SearchFilters, PaginationParams } from "@/types";
 
 interface BookListProps {
   className?: string;
 }
 
-export const BookList: React.FC<BookListProps> = ({ className = '' }) => {
+export const BookList: React.FC<BookListProps> = ({ className = "" }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<SearchFilters>({});
   const { isMobile, isTablet } = useResponsive();
-  
+
   // Responsive books per page
   const booksPerPage = isMobile ? 6 : isTablet ? 9 : 12;
 
@@ -34,7 +34,7 @@ export const BookList: React.FC<BookListProps> = ({ className = '' }) => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['books', pagination, filters],
+    queryKey: ["books", pagination, filters],
     queryFn: () => bookService.getBooks(pagination, filters),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -48,15 +48,23 @@ export const BookList: React.FC<BookListProps> = ({ className = '' }) => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     // Scroll to top when changing pages
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (isError) {
     return (
-      <div className={`text-center py-12 ${className}`} role="alert" aria-live="assertive">
+      <div
+        className={`text-center py-12 ${className}`}
+        role="alert"
+        aria-live="assertive"
+      >
         <div className="max-w-md mx-auto">
           <ErrorMessage
-            error={error instanceof Error ? error.message : 'Something went wrong while loading the books.'}
+            error={
+              error instanceof Error
+                ? error.message
+                : "Something went wrong while loading the books."
+            }
             variant="banner"
             className="mb-4"
           />
@@ -86,7 +94,7 @@ export const BookList: React.FC<BookListProps> = ({ className = '' }) => {
 
       {/* Loading state */}
       {isLoading && (
-        <div 
+        <div
           className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-8"
           role="grid"
           aria-label="Loading books"
@@ -106,16 +114,16 @@ export const BookList: React.FC<BookListProps> = ({ className = '' }) => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-2 sm:space-y-0">
             <p className="text-gray-600" role="status" aria-live="polite">
               {!booksData.totalCount || booksData.totalCount === 0 ? (
-                'No results found'
+                "No results found"
               ) : (
                 <>
-                  Showing {((currentPage - 1) * booksPerPage) + 1} to{' '}
-                  {Math.min(currentPage * booksPerPage, booksData.totalCount)} of{' '}
-                  {booksData.totalCount} books
+                  Showing {(currentPage - 1) * booksPerPage + 1} to{" "}
+                  {Math.min(currentPage * booksPerPage, booksData.totalCount)}{" "}
+                  of {booksData.totalCount} books
                 </>
               )}
             </p>
-            
+
             {booksData.totalCount > 0 && booksData.totalPages && (
               <p className="text-sm text-gray-500">
                 Page {currentPage} of {booksData.totalPages}
@@ -125,17 +133,26 @@ export const BookList: React.FC<BookListProps> = ({ className = '' }) => {
 
           {/* Books grid */}
           {booksData.books && booksData.books.length > 0 ? (
-            <div 
+            <div
               className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-8"
               role="grid"
               aria-label="Books grid"
               data-testid="book-grid"
             >
-              {booksData.books.filter(book => book && book.id).map((book, index) => (
-                <div key={book.id} role="gridcell" aria-rowindex={Math.floor(index / (isMobile ? 1 : isTablet ? 2 : 4)) + 1} className="w-full">
-                  <BookCard book={book} />
-                </div>
-              ))}
+              {booksData.books
+                .filter((book) => book && book.id)
+                .map((book, index) => (
+                  <div
+                    key={book.id}
+                    role="gridcell"
+                    aria-rowindex={
+                      Math.floor(index / (isMobile ? 1 : isTablet ? 2 : 4)) + 1
+                    }
+                    className="w-full"
+                  >
+                    <BookCard book={book} />
+                  </div>
+                ))}
             </div>
           ) : (
             <div className="text-center py-12" role="status" aria-live="polite">

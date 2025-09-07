@@ -1,55 +1,61 @@
-import React, { forwardRef } from 'react';
-import { keyboardNavigation } from '../../utils/accessibility';
+import React, { forwardRef } from "react";
+import { keyboardNavigation } from "../../utils/accessibility";
 
-interface AccessibleButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+interface AccessibleButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "danger" | "ghost";
+  size?: "sm" | "md" | "lg";
   loading?: boolean;
   loadingText?: string;
   children: React.ReactNode;
   className?: string;
-  'data-testid'?: string;
+  "data-testid"?: string;
 }
 
-export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonProps>(
+export const AccessibleButton = forwardRef<
+  HTMLButtonElement,
+  AccessibleButtonProps
+>(
   (
     {
-      variant = 'primary',
-      size = 'md',
+      variant = "primary",
+      size = "md",
       loading = false,
-      loadingText = 'Loading...',
+      loadingText = "Loading...",
       children,
-      className = '',
+      className = "",
       disabled,
       onClick,
       onKeyDown,
       ...props
     },
-    ref
+    ref,
   ) => {
-    const baseClasses = 'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
-    
+    const baseClasses =
+      "inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+
     const variantClasses = {
-      primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-      secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500',
-      danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-      ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500',
+      primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
+      secondary:
+        "bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500",
+      danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
+      ghost: "text-gray-700 hover:bg-gray-100 focus:ring-gray-500",
     };
 
     const sizeClasses = {
-      sm: 'px-3 py-1.5 text-sm',
-      md: 'px-4 py-2 text-sm',
-      lg: 'px-6 py-3 text-base',
+      sm: "px-3 py-1.5 text-sm",
+      md: "px-4 py-2 text-sm",
+      lg: "px-6 py-3 text-base",
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
       // Handle Enter and Space key activation
       keyboardNavigation.handleActivation(e.nativeEvent, () => {
         if (!disabled && !loading && onClick) {
-          onClick(e as any);
+          onClick(e as React.MouseEvent<HTMLButtonElement>);
         }
       });
-      
+
       onKeyDown?.(e);
     };
 
@@ -65,7 +71,7 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
         onKeyDown={handleKeyDown}
         aria-disabled={isDisabled}
         aria-busy={loading}
-        data-testid={props['data-testid']}
+        data-testid={props["data-testid"]}
         {...props}
       >
         {loading && (
@@ -94,11 +100,10 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
             <span className="sr-only">{loadingText}</span>
           </>
         )}
-        <span className={loading ? 'sr-only' : ''}>{children}</span>
+        <span className={loading ? "sr-only" : ""}>{children}</span>
       </button>
     );
-  }
+  },
 );
 
-AccessibleButton.displayName = 'AccessibleButton';
-
+AccessibleButton.displayName = "AccessibleButton";

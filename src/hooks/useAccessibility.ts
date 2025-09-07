@@ -1,5 +1,9 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { focusManagement, ariaUtils, keyboardNavigation } from '../utils/accessibility';
+import { useEffect, useRef, useState, useCallback } from "react";
+import {
+  focusManagement,
+  ariaUtils,
+  keyboardNavigation,
+} from "../utils/accessibility";
 
 /**
  * Hook for managing focus trap in modals and dropdowns
@@ -12,10 +16,10 @@ export const useFocusTrap = (isActive: boolean) => {
     if (isActive && containerRef.current) {
       // Store the currently focused element
       previousFocusRef.current = focusManagement.getCurrentFocus();
-      
+
       // Trap focus within the container
       const cleanup = focusManagement.trapFocus(containerRef.current);
-      
+
       return () => {
         cleanup();
         // Restore focus to the previously focused element
@@ -33,9 +37,12 @@ export const useFocusTrap = (isActive: boolean) => {
  * Hook for managing ARIA live regions and announcements
  */
 export const useAriaAnnouncements = () => {
-  const announce = useCallback((message: string, priority: 'polite' | 'assertive' = 'polite') => {
-    ariaUtils.announce(message, priority);
-  }, []);
+  const announce = useCallback(
+    (message: string, priority: "polite" | "assertive" = "polite") => {
+      ariaUtils.announce(message, priority);
+    },
+    [],
+  );
 
   return { announce };
 };
@@ -43,18 +50,28 @@ export const useAriaAnnouncements = () => {
 /**
  * Hook for keyboard navigation in lists
  */
-export const useKeyboardNavigation = (items: HTMLElement[], initialIndex: number = 0) => {
+export const useKeyboardNavigation = (
+  items: HTMLElement[],
+  initialIndex: number = 0,
+) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    const newIndex = keyboardNavigation.handleArrowNavigation(event, items, currentIndex);
-    setCurrentIndex(newIndex);
-  }, [items, currentIndex]);
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      const newIndex = keyboardNavigation.handleArrowNavigation(
+        event,
+        items,
+        currentIndex,
+      );
+      setCurrentIndex(newIndex);
+    },
+    [items, currentIndex],
+  );
 
   useEffect(() => {
     if (items.length > 0) {
-      document.addEventListener('keydown', handleKeyDown);
-      return () => document.removeEventListener('keydown', handleKeyDown);
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
     }
   }, [handleKeyDown, items.length]);
 
@@ -68,25 +85,28 @@ export const useFormValidation = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  const validateField = useCallback((
-    name: string,
-    value: any,
-    validators: Array<(value: any) => string | null>
-  ) => {
-    const error = validators
-      .map(validator => validator(value))
-      .find(error => error !== null);
+  const validateField = useCallback(
+    (
+      name: string,
+      value: unknown,
+      validators: Array<(value: unknown) => string | null>,
+    ) => {
+      const error = validators
+        .map((validator) => validator(value))
+        .find((error) => error !== null);
 
-    setErrors(prev => ({
-      ...prev,
-      [name]: error || '',
-    }));
+      setErrors((prev) => ({
+        ...prev,
+        [name]: error || "",
+      }));
 
-    return !error;
-  }, []);
+      return !error;
+    },
+    [],
+  );
 
   const setFieldTouched = useCallback((name: string) => {
-    setTouched(prev => ({
+    setTouched((prev) => ({
       ...prev,
       [name]: true,
     }));
@@ -96,7 +116,7 @@ export const useFormValidation = () => {
     setErrors({});
   }, []);
 
-  const hasErrors = Object.values(errors).some(error => error !== '');
+  const hasErrors = Object.values(errors).some((error) => error !== "");
   const isFormValid = !hasErrors;
 
   return {
@@ -115,16 +135,16 @@ export const useFormValidation = () => {
  */
 export const useLoadingState = (initialState: boolean = false) => {
   const [isLoading, setIsLoading] = useState(initialState);
-  const [loadingMessage, setLoadingMessage] = useState<string>('');
+  const [loadingMessage, setLoadingMessage] = useState<string>("");
 
-  const startLoading = useCallback((message: string = 'Loading...') => {
+  const startLoading = useCallback((message: string = "Loading...") => {
     setIsLoading(true);
     setLoadingMessage(message);
   }, []);
 
   const stopLoading = useCallback(() => {
     setIsLoading(false);
-    setLoadingMessage('');
+    setLoadingMessage("");
   }, []);
 
   return {
@@ -140,7 +160,7 @@ export const useLoadingState = (initialState: boolean = false) => {
  */
 export const useErrorState = () => {
   const [error, setError] = useState<string | null>(null);
-  const [errorId] = useState(() => ariaUtils.generateId('error'));
+  const [errorId] = useState(() => ariaUtils.generateId("error"));
 
   const setErrorMessage = useCallback((message: string | null) => {
     setError(message);
@@ -162,27 +182,30 @@ export const useErrorState = () => {
  * Hook for managing responsive design
  */
 export const useResponsive = () => {
-  const [screenSize, setScreenSize] = useState<'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'>('lg');
+  const [screenSize, setScreenSize] = useState<
+    "xs" | "sm" | "md" | "lg" | "xl" | "2xl"
+  >("lg");
 
   useEffect(() => {
     const updateScreenSize = () => {
       const width = window.innerWidth;
-      if (width < 475) setScreenSize('xs');
-      else if (width < 640) setScreenSize('sm');
-      else if (width < 768) setScreenSize('md');
-      else if (width < 1024) setScreenSize('lg');
-      else if (width < 1280) setScreenSize('xl');
-      else setScreenSize('2xl');
+      if (width < 475) setScreenSize("xs");
+      else if (width < 640) setScreenSize("sm");
+      else if (width < 768) setScreenSize("md");
+      else if (width < 1024) setScreenSize("lg");
+      else if (width < 1280) setScreenSize("xl");
+      else setScreenSize("2xl");
     };
 
     updateScreenSize();
-    window.addEventListener('resize', updateScreenSize);
-    return () => window.removeEventListener('resize', updateScreenSize);
+    window.addEventListener("resize", updateScreenSize);
+    return () => window.removeEventListener("resize", updateScreenSize);
   }, []);
 
-  const isMobile = screenSize === 'xs' || screenSize === 'sm';
-  const isTablet = screenSize === 'md';
-  const isDesktop = screenSize === 'lg' || screenSize === 'xl' || screenSize === '2xl';
+  const isMobile = screenSize === "xs" || screenSize === "sm";
+  const isTablet = screenSize === "md";
+  const isDesktop =
+    screenSize === "lg" || screenSize === "xl" || screenSize === "2xl";
 
   return {
     screenSize,
@@ -200,14 +223,14 @@ export const useSkipLinks = () => {
 
   const addSkipLink = useCallback((targetId: string, text: string) => {
     if (skipLinksRef.current) {
-      const skipLink = document.createElement('a');
+      const skipLink = document.createElement("a");
       skipLink.href = `#${targetId}`;
       skipLink.textContent = text;
-      skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-md z-50';
+      skipLink.className =
+        "sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-md z-50";
       skipLinksRef.current.appendChild(skipLink);
     }
   }, []);
 
   return { skipLinksRef, addSkipLink };
 };
-

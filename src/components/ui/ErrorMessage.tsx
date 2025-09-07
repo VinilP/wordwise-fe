@@ -1,24 +1,24 @@
-import React from 'react';
+import React from "react";
 
 interface ErrorMessageProps {
   error: string;
   id?: string;
   className?: string;
-  variant?: 'default' | 'inline' | 'banner';
+  variant?: "default" | "inline" | "banner";
 }
 
 export const ErrorMessage: React.FC<ErrorMessageProps> = ({
   error,
   id,
-  className = '',
-  variant = 'default',
+  className = "",
+  variant = "default",
 }) => {
-  const baseClasses = 'text-red-600';
-  
+  const baseClasses = "text-red-600";
+
   const variantClasses = {
-    default: 'text-sm',
-    inline: 'text-sm inline',
-    banner: 'text-sm bg-red-50 border border-red-200 rounded-md p-3',
+    default: "text-sm",
+    inline: "text-sm inline",
+    banner: "text-sm bg-red-50 border border-red-200 rounded-md p-3",
   };
 
   const icon = (
@@ -36,7 +36,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
     </svg>
   );
 
-  if (variant === 'banner') {
+  if (variant === "banner") {
     return (
       <div
         id={id}
@@ -45,9 +45,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
         aria-live="assertive"
       >
         <div className="flex">
-          <div className="flex-shrink-0">
-            {icon}
-          </div>
+          <div className="flex-shrink-0">{icon}</div>
           <div className="ml-3">
             <p className="font-medium">Error</p>
             <p className="mt-1">{error}</p>
@@ -68,4 +66,3 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
     </p>
   );
 };
-

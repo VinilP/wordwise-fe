@@ -1,14 +1,14 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter } from 'react-router-dom';
-import { vi } from 'vitest';
-import { BookList } from '../BookList';
-import { bookService } from '../../../services';
-import { PaginatedBooks } from '../../../types';
-import { AuthProvider } from '../../../contexts/AuthContext';
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter } from "react-router-dom";
+import { vi } from "vitest";
+import { BookList } from "../BookList";
+import { bookService } from "../../../services";
+import { PaginatedBooks } from "../../../types";
+import { AuthProvider } from "../../../contexts/AuthContext";
 
 // Mock the book service
-vi.mock('../../../services', () => ({
+vi.mock("../../../services", () => ({
   bookService: {
     getBooks: vi.fn(),
   },
@@ -32,30 +32,30 @@ const mockBookService = bookService as any;
 const mockBooksData: PaginatedBooks = {
   books: [
     {
-      id: '1',
-      title: 'Test Book 1',
-      author: 'Author 1',
-      description: 'Description 1',
-      coverImageUrl: 'https://example.com/cover1.jpg',
-      genres: ['Fiction'],
+      id: "1",
+      title: "Test Book 1",
+      author: "Author 1",
+      description: "Description 1",
+      coverImageUrl: "https://example.com/cover1.jpg",
+      genres: ["Fiction"],
       publishedYear: 2023,
       averageRating: 4.5,
       reviewCount: 10,
-      createdAt: '2023-01-01T00:00:00Z',
-      updatedAt: '2023-01-01T00:00:00Z',
+      createdAt: "2023-01-01T00:00:00Z",
+      updatedAt: "2023-01-01T00:00:00Z",
     },
     {
-      id: '2',
-      title: 'Test Book 2',
-      author: 'Author 2',
-      description: 'Description 2',
-      coverImageUrl: 'https://example.com/cover2.jpg',
-      genres: ['Mystery'],
+      id: "2",
+      title: "Test Book 2",
+      author: "Author 2",
+      description: "Description 2",
+      coverImageUrl: "https://example.com/cover2.jpg",
+      genres: ["Mystery"],
       publishedYear: 2022,
       averageRating: 3.8,
       reviewCount: 5,
-      createdAt: '2023-01-01T00:00:00Z',
-      updatedAt: '2023-01-01T00:00:00Z',
+      createdAt: "2023-01-01T00:00:00Z",
+      updatedAt: "2023-01-01T00:00:00Z",
     },
   ],
   totalCount: 25,
@@ -81,73 +81,79 @@ const renderWithProviders = (component: React.ReactElement) => {
       <AuthProvider>
         <BrowserRouter>{component}</BrowserRouter>
       </AuthProvider>
-    </QueryClientProvider>
+    </QueryClientProvider>,
   );
 };
 
-describe('BookList', () => {
+describe("BookList", () => {
   beforeEach(() => {
     mockBookService.getBooks.mockClear();
   });
 
-  it('renders loading state initially', () => {
+  it("renders loading state initially", () => {
     mockBookService.getBooks.mockImplementation(
-      () => new Promise(() => {}) // Never resolves
+      () => new Promise(() => {}), // Never resolves
     );
 
     renderWithProviders(<BookList />);
 
-    expect(screen.getByLabelText('Loading books')).toBeInTheDocument();
-    expect(screen.getByRole('grid')).toBeInTheDocument(); // Loading grid
+    expect(screen.getByLabelText("Loading books")).toBeInTheDocument();
+    expect(screen.getByRole("grid")).toBeInTheDocument(); // Loading grid
   });
 
-  it('renders books when data is loaded', async () => {
+  it("renders books when data is loaded", async () => {
     mockBookService.getBooks.mockResolvedValue(mockBooksData);
 
     renderWithProviders(<BookList />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Test Book 1' })).toBeInTheDocument();
-      expect(screen.getByRole('heading', { name: 'Test Book 2' })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Test Book 1" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Test Book 2" }),
+      ).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Showing 1 to 12 of 25 books')).toBeInTheDocument();
-    expect(screen.getByText('Page 1 of 3')).toBeInTheDocument();
+    expect(screen.getByText("Showing 1 to 12 of 25 books")).toBeInTheDocument();
+    expect(screen.getByText("Page 1 of 3")).toBeInTheDocument();
   });
 
-  it('renders error state when API call fails', async () => {
-    const errorMessage = 'Failed to fetch books';
+  it("renders error state when API call fails", async () => {
+    const errorMessage = "Failed to fetch books";
     mockBookService.getBooks.mockRejectedValue(new Error(errorMessage));
 
     renderWithProviders(<BookList />);
 
     await waitFor(() => {
-      expect(screen.getByText('Failed to load books')).toBeInTheDocument();
+      expect(screen.getByText("Failed to load books")).toBeInTheDocument();
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Try Again')).toBeInTheDocument();
+    expect(screen.getByText("Try Again")).toBeInTheDocument();
   });
 
-  it('retries API call when Try Again button is clicked', async () => {
+  it("retries API call when Try Again button is clicked", async () => {
     mockBookService.getBooks
-      .mockRejectedValueOnce(new Error('Network error'))
+      .mockRejectedValueOnce(new Error("Network error"))
       .mockResolvedValueOnce(mockBooksData);
 
     renderWithProviders(<BookList />);
 
     await waitFor(() => {
-      expect(screen.getByText('Failed to load books')).toBeInTheDocument();
+      expect(screen.getByText("Failed to load books")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Try Again'));
+    fireEvent.click(screen.getByText("Try Again"));
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Test Book 1' })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Test Book 1" }),
+      ).toBeInTheDocument();
     });
   });
 
-  it('renders empty state when no books are found', async () => {
+  it("renders empty state when no books are found", async () => {
     const emptyData: PaginatedBooks = {
       ...mockBooksData,
       books: [],
@@ -160,20 +166,26 @@ describe('BookList', () => {
     renderWithProviders(<BookList />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'No books found' })).toBeInTheDocument();
-      expect(screen.getByText('Try adjusting your search criteria or filters.')).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "No books found" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Try adjusting your search criteria or filters."),
+      ).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Clear all filters')).toBeInTheDocument();
+    expect(screen.getByText("Clear all filters")).toBeInTheDocument();
   });
 
-  it('handles pagination correctly', async () => {
+  it("handles pagination correctly", async () => {
     mockBookService.getBooks.mockResolvedValue(mockBooksData);
 
     renderWithProviders(<BookList />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Test Book 1' })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Test Book 1" }),
+      ).toBeInTheDocument();
     });
 
     // Mock second page data
@@ -187,40 +199,47 @@ describe('BookList', () => {
     mockBookService.getBooks.mockResolvedValue(secondPageData);
 
     // Click next page
-    const nextButton = screen.getByText('Next');
+    const nextButton = screen.getByText("Next");
     fireEvent.click(nextButton);
 
     await waitFor(() => {
       expect(mockBookService.getBooks).toHaveBeenCalledWith(
         { page: 2, limit: 12 },
-        {}
+        {},
       );
     });
   });
 
-  it('handles search filters correctly', async () => {
+  it("handles search filters correctly", async () => {
     mockBookService.getBooks.mockResolvedValue(mockBooksData);
 
     renderWithProviders(<BookList />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Test Book 1' })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Test Book 1" }),
+      ).toBeInTheDocument();
     });
 
     // Simulate search
-    const searchInput = screen.getByPlaceholderText('Search books by title or author...');
-    fireEvent.change(searchInput, { target: { value: 'fantasy' } });
+    const searchInput = screen.getByPlaceholderText(
+      "Search books by title or author...",
+    );
+    fireEvent.change(searchInput, { target: { value: "fantasy" } });
 
     // Wait for debounced search
-    await waitFor(() => {
-      expect(mockBookService.getBooks).toHaveBeenCalledWith(
-        { page: 1, limit: 12 },
-        { query: 'fantasy' }
-      );
-    }, { timeout: 1000 });
+    await waitFor(
+      () => {
+        expect(mockBookService.getBooks).toHaveBeenCalledWith(
+          { page: 1, limit: 12 },
+          { query: "fantasy" },
+        );
+      },
+      { timeout: 1000 },
+    );
   });
 
-  it('resets to first page when search filters change', async () => {
+  it("resets to first page when search filters change", async () => {
     mockBookService.getBooks.mockResolvedValue({
       ...mockBooksData,
       currentPage: 2,
@@ -229,50 +248,60 @@ describe('BookList', () => {
     renderWithProviders(<BookList />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Test Book 1' })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Test Book 1" }),
+      ).toBeInTheDocument();
     });
 
     // Change search - should reset to page 1
-    const searchInput = screen.getByPlaceholderText('Search books by title or author...');
-    fireEvent.change(searchInput, { target: { value: 'test' } });
+    const searchInput = screen.getByPlaceholderText(
+      "Search books by title or author...",
+    );
+    fireEvent.change(searchInput, { target: { value: "test" } });
 
     await waitFor(() => {
       expect(mockBookService.getBooks).toHaveBeenCalledWith(
         { page: 1, limit: 12 },
-        { query: 'test' }
+        { query: "test" },
       );
     });
   });
 
-  it('scrolls to top when changing pages', async () => {
-    const scrollToSpy = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
-    
+  it("scrolls to top when changing pages", async () => {
+    const scrollToSpy = vi
+      .spyOn(window, "scrollTo")
+      .mockImplementation(() => {});
+
     mockBookService.getBooks.mockResolvedValue(mockBooksData);
 
     renderWithProviders(<BookList />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Test Book 1' })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Test Book 1" }),
+      ).toBeInTheDocument();
     });
 
     // Click next page
-    const nextButton = screen.getByText('Next');
+    const nextButton = screen.getByText("Next");
     fireEvent.click(nextButton);
 
-    expect(scrollToSpy).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
+    expect(scrollToSpy).toHaveBeenCalledWith({ top: 0, behavior: "smooth" });
 
     scrollToSpy.mockRestore();
   });
 
-  it('applies custom className when provided', () => {
+  it("applies custom className when provided", () => {
     mockBookService.getBooks.mockResolvedValue(mockBooksData);
 
-    const { container } = renderWithProviders(<BookList className="custom-class" />);
+    const { container } = renderWithProviders(
+      <BookList className="custom-class" />,
+    );
 
-    expect(container.firstChild).toHaveClass('custom-class');
+    expect(container.firstChild).toHaveClass("custom-class");
   });
 
-  it('renders pagination only when there are multiple pages', async () => {
+  it("renders pagination only when there are multiple pages", async () => {
     const singlePageData: PaginatedBooks = {
       ...mockBooksData,
       totalPages: 1,
@@ -284,14 +313,16 @@ describe('BookList', () => {
     renderWithProviders(<BookList />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Test Book 1' })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Test Book 1" }),
+      ).toBeInTheDocument();
     });
 
-    expect(screen.queryByText('Previous')).not.toBeInTheDocument();
-    expect(screen.queryByText('Next')).not.toBeInTheDocument();
+    expect(screen.queryByText("Previous")).not.toBeInTheDocument();
+    expect(screen.queryByText("Next")).not.toBeInTheDocument();
   });
 
-  it('calls API with correct parameters on initial load', async () => {
+  it("calls API with correct parameters on initial load", async () => {
     mockBookService.getBooks.mockResolvedValue(mockBooksData);
 
     renderWithProviders(<BookList />);
@@ -299,7 +330,7 @@ describe('BookList', () => {
     await waitFor(() => {
       expect(mockBookService.getBooks).toHaveBeenCalledWith(
         { page: 1, limit: 12 },
-        {}
+        {},
       );
     });
   });

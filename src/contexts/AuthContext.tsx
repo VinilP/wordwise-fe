@@ -1,7 +1,12 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
-import type { AuthContextType, User, LoginRequest, RegisterRequest } from '@/types';
-import { authService, tokenManager } from '@/services';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import type { ReactNode } from "react";
+import type {
+  AuthContextType,
+  User,
+  LoginRequest,
+  RegisterRequest,
+} from "@/types";
+import { authService, tokenManager } from "@/services";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -13,9 +18,9 @@ interface AuthProviderProps {
   };
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ 
-  children, 
-  initialAuthState 
+export const AuthProvider: React.FC<AuthProviderProps> = ({
+  children,
+  initialAuthState,
 }) => {
   const [user, setUser] = useState<User | null>(initialAuthState?.user || null);
   const [token, setToken] = useState<string | null>(null);
@@ -34,43 +39,49 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         const storedToken = tokenManager.getToken();
         const storedUser = tokenManager.getUser();
 
-        console.log('🔍 Auth initialization:', { 
-          hasToken: !!storedToken, 
+        console.log("🔍 Auth initialization:", {
+          hasToken: !!storedToken,
           hasUser: !!storedUser,
-          tokenLength: storedToken?.length || 0
+          tokenLength: storedToken?.length || 0,
         });
 
         if (storedToken && storedUser) {
           setToken(storedToken);
           setUser(storedUser);
-          
+
           // Only validate token if backend is available
           try {
-            console.log('🔄 Validating token with backend...');
+            console.log("🔄 Validating token with backend...");
             const currentUser = await authService.getCurrentUser();
             setUser(currentUser);
-            console.log('✅ Token validation successful');
+            console.log("✅ Token validation successful");
           } catch (error) {
-            console.log('❌ Token validation failed:', {
+            console.log("❌ Token validation failed:", {
               status: error.response?.status,
               message: error.message,
-              isNetworkError: !error.response
+              isNetworkError: !error.response,
             });
-            
+
             // Only logout if it's a 401 (unauthorized) error
             if (error.response?.status === 401) {
-              console.error('🚪 Token validation failed - user will be logged out:', error);
+              console.error(
+                "🚪 Token validation failed - user will be logged out:",
+                error,
+              );
               await logout();
             } else {
               // For other errors (network, server down), keep user logged in
-              console.warn('⚠️ Token validation failed but keeping user logged in:', error);
+              console.warn(
+                "⚠️ Token validation failed but keeping user logged in:",
+                error,
+              );
             }
           }
         } else {
-          console.log('ℹ️ No stored token or user found');
+          console.log("ℹ️ No stored token or user found");
         }
       } catch (error) {
-        console.error('💥 Auth initialization error:', error);
+        console.error("💥 Auth initialization error:", error);
         // Don't auto-logout on initialization errors
       } finally {
         setIsLoading(false);
@@ -112,7 +123,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     try {
       await authService.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       setUser(null);
       setToken(null);
@@ -133,17 +144,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     isAuthenticated,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

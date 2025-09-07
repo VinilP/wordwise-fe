@@ -1,30 +1,34 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor } from '@/test/utils/test-utils';
-import userEvent from '@testing-library/user-event';
-import { QueryClient } from '@tanstack/react-query';
-import { App } from '@/App';
-import { createMockUser, createMockBook } from '@/test/utils/test-utils';
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { render, screen, waitFor } from "@/test/utils/test-utils";
+import userEvent from "@testing-library/user-event";
+import { QueryClient } from "@tanstack/react-query";
+import { App } from "@/App";
+import { createMockUser } from "@/test/utils/test-utils";
 
 // Mock router functions
 const mockNavigate = vi.fn();
-const mockLocation = vi.fn(() => ({ pathname: '/', search: '', hash: '', state: null }));
+const mockLocation = vi.fn(() => ({
+  pathname: "/",
+  search: "",
+  hash: "",
+  state: null,
+}));
 
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
   return {
     ...actual,
     useNavigate: () => mockNavigate,
     useLocation: () => mockLocation(),
-    useParams: () => ({ id: '1' }),
+    useParams: () => ({ id: "1" }),
     // Keep the actual BrowserRouter for proper context
     BrowserRouter: actual.BrowserRouter,
   };
 });
 
-describe('Book Review Workflow Integration Tests', () => {
+describe("Book Review Workflow Integration Tests", () => {
   let queryClient: QueryClient;
   const mockUser = createMockUser();
-  const mockBook = createMockBook();
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -36,13 +40,13 @@ describe('Book Review Workflow Integration Tests', () => {
     vi.clearAllMocks();
   });
 
-  describe('Book Discovery Workflow', () => {
-    it('should allow users to search and discover books', async () => {
+  describe("Book Discovery Workflow", () => {
+    it("should allow users to search and discover books", async () => {
       const user = userEvent.setup();
-      
-      render(<App />, { 
+
+      render(<App />, {
         queryClient,
-        initialAuthState: { user: mockUser, isAuthenticated: true }
+        initialAuthState: { user: mockUser, isAuthenticated: true },
       });
 
       // Wait for books to load
@@ -52,7 +56,7 @@ describe('Book Review Workflow Integration Tests', () => {
 
       // Search for books
       const searchInput = screen.getByPlaceholderText(/search books/i);
-      await user.type(searchInput, 'gatsby');
+      await user.type(searchInput, "gatsby");
 
       // Wait for search results
       await waitFor(() => {
@@ -69,12 +73,12 @@ describe('Book Review Workflow Integration Tests', () => {
       });
     });
 
-    it('should allow users to filter books by genre', async () => {
+    it("should allow users to filter books by genre", async () => {
       const user = userEvent.setup();
-      
-      render(<App />, { 
+
+      render(<App />, {
         queryClient,
-        initialAuthState: { user: mockUser, isAuthenticated: true }
+        initialAuthState: { user: mockUser, isAuthenticated: true },
       });
 
       // Wait for books to load
@@ -87,7 +91,9 @@ describe('Book Review Workflow Integration Tests', () => {
       await user.click(filterButton);
 
       // Select a genre filter
-      const fictionFilter = screen.getByRole('button', { name: /add fiction filter/i });
+      const fictionFilter = screen.getByRole("button", {
+        name: /add fiction filter/i,
+      });
       await user.click(fictionFilter);
 
       // Wait for filtered results
@@ -96,10 +102,10 @@ describe('Book Review Workflow Integration Tests', () => {
       });
     });
 
-    it('should display book details correctly', async () => {
-      render(<App />, { 
+    it("should display book details correctly", async () => {
+      render(<App />, {
         queryClient,
-        initialAuthState: { user: mockUser, isAuthenticated: true }
+        initialAuthState: { user: mockUser, isAuthenticated: true },
       });
 
       // Navigate to book detail page
@@ -114,20 +120,22 @@ describe('Book Review Workflow Integration Tests', () => {
       await waitFor(() => {
         expect(screen.getByText(/the great gatsby/i)).toBeInTheDocument();
         expect(screen.getByText(/f\. scott fitzgerald/i)).toBeInTheDocument();
-        expect(screen.getByText(/a classic american novel/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/a classic american novel/i),
+        ).toBeInTheDocument();
         expect(screen.getByText(/1925/i)).toBeInTheDocument();
         expect(screen.getByText(/4\.2/i)).toBeInTheDocument();
       });
     });
   });
 
-  describe('Review Creation Workflow', () => {
-    it('should allow users to create a review', async () => {
+  describe("Review Creation Workflow", () => {
+    it("should allow users to create a review", async () => {
       const user = userEvent.setup();
-      
-      render(<App />, { 
+
+      render(<App />, {
         queryClient,
-        initialAuthState: { user: mockUser, isAuthenticated: true }
+        initialAuthState: { user: mockUser, isAuthenticated: true },
       });
 
       // Navigate to book detail page
@@ -150,29 +158,35 @@ describe('Book Review Workflow Integration Tests', () => {
       // Fill in review form
       const ratingInput = screen.getByLabelText(/rating/i);
       const commentTextarea = screen.getByPlaceholderText(/write your review/i);
-      const submitButton = screen.getByRole('button', { name: /submit review/i });
+      const submitButton = screen.getByRole("button", {
+        name: /submit review/i,
+      });
 
-      await user.type(ratingInput, '5');
-      await user.type(commentTextarea, 'This is an amazing book!');
+      await user.type(ratingInput, "5");
+      await user.type(commentTextarea, "This is an amazing book!");
       await user.click(submitButton);
 
       // Wait for review to be created
       await waitFor(() => {
-        expect(screen.getByText(/review submitted successfully/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/review submitted successfully/i),
+        ).toBeInTheDocument();
       });
 
       // Verify review appears in the list
       await waitFor(() => {
-        expect(screen.getByText(/this is an amazing book/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/this is an amazing book/i),
+        ).toBeInTheDocument();
       });
     });
 
-    it('should validate review form before submission', async () => {
+    it("should validate review form before submission", async () => {
       const user = userEvent.setup();
-      
-      render(<App />, { 
+
+      render(<App />, {
         queryClient,
-        initialAuthState: { user: mockUser, isAuthenticated: true }
+        initialAuthState: { user: mockUser, isAuthenticated: true },
       });
 
       // Navigate to book detail page
@@ -193,7 +207,9 @@ describe('Book Review Workflow Integration Tests', () => {
       await user.click(writeReviewButton);
 
       // Try to submit without filling form
-      const submitButton = screen.getByRole('button', { name: /submit review/i });
+      const submitButton = screen.getByRole("button", {
+        name: /submit review/i,
+      });
       await user.click(submitButton);
 
       // Check for validation errors
@@ -203,12 +219,12 @@ describe('Book Review Workflow Integration Tests', () => {
       });
     });
 
-    it('should allow users to edit their reviews', async () => {
+    it("should allow users to edit their reviews", async () => {
       const user = userEvent.setup();
-      
-      render(<App />, { 
+
+      render(<App />, {
         queryClient,
-        initialAuthState: { user: mockUser, isAuthenticated: true }
+        initialAuthState: { user: mockUser, isAuthenticated: true },
       });
 
       // Navigate to book detail page
@@ -231,9 +247,9 @@ describe('Book Review Workflow Integration Tests', () => {
       // Update review
       const commentTextarea = screen.getByPlaceholderText(/write your review/i);
       await user.clear(commentTextarea);
-      await user.type(commentTextarea, 'Updated review comment');
-      
-      const saveButton = screen.getByRole('button', { name: /save changes/i });
+      await user.type(commentTextarea, "Updated review comment");
+
+      const saveButton = screen.getByRole("button", { name: /save changes/i });
       await user.click(saveButton);
 
       // Wait for review to be updated
@@ -242,12 +258,12 @@ describe('Book Review Workflow Integration Tests', () => {
       });
     });
 
-    it('should allow users to delete their reviews', async () => {
+    it("should allow users to delete their reviews", async () => {
       const user = userEvent.setup();
-      
-      render(<App />, { 
+
+      render(<App />, {
         queryClient,
-        initialAuthState: { user: mockUser, isAuthenticated: true }
+        initialAuthState: { user: mockUser, isAuthenticated: true },
       });
 
       // Navigate to book detail page
@@ -268,7 +284,7 @@ describe('Book Review Workflow Integration Tests', () => {
       await user.click(deleteButton);
 
       // Confirm deletion
-      const confirmButton = screen.getByRole('button', { name: /delete/i });
+      const confirmButton = screen.getByRole("button", { name: /delete/i });
       await user.click(confirmButton);
 
       // Wait for review to be deleted
@@ -278,13 +294,13 @@ describe('Book Review Workflow Integration Tests', () => {
     });
   });
 
-  describe('Book Rating Workflow', () => {
-    it('should allow users to rate books', async () => {
+  describe("Book Rating Workflow", () => {
+    it("should allow users to rate books", async () => {
       const user = userEvent.setup();
-      
-      render(<App />, { 
+
+      render(<App />, {
         queryClient,
-        initialAuthState: { user: mockUser, isAuthenticated: true }
+        initialAuthState: { user: mockUser, isAuthenticated: true },
       });
 
       // Navigate to book detail page
@@ -301,7 +317,7 @@ describe('Book Review Workflow Integration Tests', () => {
       });
 
       // Click on rating stars
-      const ratingStars = screen.getAllByRole('button', { name: /rate/i });
+      const ratingStars = screen.getAllByRole("button", { name: /rate/i });
       await user.click(ratingStars[4]); // Click 5th star for 5-star rating
 
       // Wait for rating to be saved
@@ -310,10 +326,10 @@ describe('Book Review Workflow Integration Tests', () => {
       });
     });
 
-    it('should display average rating correctly', async () => {
-      render(<App />, { 
+    it("should display average rating correctly", async () => {
+      render(<App />, {
         queryClient,
-        initialAuthState: { user: mockUser, isAuthenticated: true }
+        initialAuthState: { user: mockUser, isAuthenticated: true },
       });
 
       // Navigate to book detail page
@@ -332,13 +348,13 @@ describe('Book Review Workflow Integration Tests', () => {
     });
   });
 
-  describe('Book Favorites Workflow', () => {
-    it('should allow users to add books to favorites', async () => {
+  describe("Book Favorites Workflow", () => {
+    it("should allow users to add books to favorites", async () => {
       const user = userEvent.setup();
-      
-      render(<App />, { 
+
+      render(<App />, {
         queryClient,
-        initialAuthState: { user: mockUser, isAuthenticated: true }
+        initialAuthState: { user: mockUser, isAuthenticated: true },
       });
 
       // Navigate to book detail page
@@ -364,15 +380,17 @@ describe('Book Review Workflow Integration Tests', () => {
       });
 
       // Verify button state changed
-      expect(screen.getByLabelText(/remove from favorites/i)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/remove from favorites/i),
+      ).toBeInTheDocument();
     });
 
-    it('should allow users to remove books from favorites', async () => {
+    it("should allow users to remove books from favorites", async () => {
       const user = userEvent.setup();
-      
-      render(<App />, { 
+
+      render(<App />, {
         queryClient,
-        initialAuthState: { user: mockUser, isAuthenticated: true }
+        initialAuthState: { user: mockUser, isAuthenticated: true },
       });
 
       // Navigate to book detail page
@@ -385,7 +403,9 @@ describe('Book Review Workflow Integration Tests', () => {
 
       // Wait for book detail page
       await waitFor(() => {
-        expect(screen.getByLabelText(/remove from favorites/i)).toBeInTheDocument();
+        expect(
+          screen.getByLabelText(/remove from favorites/i),
+        ).toBeInTheDocument();
       });
 
       // Click remove from favorites button

@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
@@ -22,7 +22,11 @@ export class RecommendationErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Recommendation Error Boundary caught an error:', error, errorInfo);
+    console.error(
+      "Recommendation Error Boundary caught an error:",
+      error,
+      errorInfo,
+    );
     this.setState({ error, errorInfo });
   }
 
@@ -54,14 +58,14 @@ export class RecommendationErrorBoundary extends Component<Props, State> {
                 />
               </svg>
             </div>
-            
+
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               Something went wrong
             </h2>
-            
+
             <p className="text-gray-600 mb-6">
-              We encountered an unexpected error while loading your recommendations. 
-              This might be a temporary issue.
+              We encountered an unexpected error while loading your
+              recommendations. This might be a temporary issue.
             </p>
 
             <div className="space-y-4">
@@ -71,7 +75,7 @@ export class RecommendationErrorBoundary extends Component<Props, State> {
               >
                 Try Again
               </button>
-              
+
               <button
                 onClick={() => window.location.reload()}
                 className="w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-md hover:bg-gray-200 transition-colors"
@@ -80,7 +84,7 @@ export class RecommendationErrorBoundary extends Component<Props, State> {
               </button>
             </div>
 
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {process.env.NODE_ENV === "development" && this.state.error && (
               <details className="mt-6 text-left">
                 <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
                   Error Details (Development)
@@ -108,4 +112,3 @@ export class RecommendationErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
-

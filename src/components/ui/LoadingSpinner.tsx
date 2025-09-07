@@ -1,32 +1,36 @@
-import React from 'react';
+import React from "react";
 
 interface LoadingSpinnerProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   text?: string;
   className?: string;
-  'aria-label'?: string;
+  "aria-label"?: string;
 }
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
-  size = 'md',
-  text = 'Loading...',
-  className = '',
-  'aria-label': ariaLabel = 'Loading content',
+  size = "md",
+  text = "Loading...",
+  className = "",
+  "aria-label": ariaLabel = "Loading content",
 }) => {
   const sizeClasses = {
-    sm: 'h-4 w-4',
-    md: 'h-8 w-8',
-    lg: 'h-12 w-12',
+    sm: "h-4 w-4",
+    md: "h-8 w-8",
+    lg: "h-12 w-12",
   };
 
   const textSizeClasses = {
-    sm: 'text-sm',
-    md: 'text-base',
-    lg: 'text-lg',
+    sm: "text-sm",
+    md: "text-base",
+    lg: "text-lg",
   };
 
   return (
-    <div className={`flex flex-col items-center justify-center ${className}`} role="status" aria-label={ariaLabel}>
+    <div
+      className={`flex flex-col items-center justify-center ${className}`}
+      role="status"
+      aria-label={ariaLabel}
+    >
       <svg
         className={`animate-spin ${sizeClasses[size]} text-blue-600`}
         xmlns="http://www.w3.org/2000/svg"
@@ -50,7 +54,10 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       </svg>
       {text && (
         <>
-          <p className={`mt-2 text-gray-600 ${textSizeClasses[size]}`} aria-hidden="true">
+          <p
+            className={`mt-2 text-gray-600 ${textSizeClasses[size]}`}
+            aria-hidden="true"
+          >
             {text}
           </p>
           <span className="sr-only">{text}</span>
@@ -59,4 +66,3 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     </div>
   );
 };
-

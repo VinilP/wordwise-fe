@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import ProtectedRoute from '../ProtectedRoute';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ProtectedRoute from "../ProtectedRoute";
 
 // Mock the useAuth hook
 const mockUseAuth = vi.fn();
@@ -9,12 +9,12 @@ const mockUseAuth = vi.fn();
 // Mock useLocation
 const mockUseLocation = vi.fn();
 
-vi.mock('@/contexts/AuthContext', () => ({
+vi.mock("@/contexts/AuthContext", () => ({
   useAuth: () => mockUseAuth(),
 }));
 
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
   return {
     ...actual,
     useLocation: () => mockUseLocation(),
@@ -38,23 +38,23 @@ const renderProtectedRoute = () => {
           }
         />
       </Routes>
-    </BrowserRouter>
+    </BrowserRouter>,
   );
 };
 
-describe('ProtectedRoute', () => {
+describe("ProtectedRoute", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseLocation.mockReturnValue({
-      pathname: '/',
-      search: '',
-      hash: '',
+      pathname: "/",
+      search: "",
+      hash: "",
       state: null,
-      key: 'test-key'
+      key: "test-key",
     });
   });
 
-  it('should show loading spinner when authentication is loading', () => {
+  it("should show loading spinner when authentication is loading", () => {
     mockUseAuth.mockReturnValue({
       isAuthenticated: false,
       isLoading: true,
@@ -66,30 +66,30 @@ describe('ProtectedRoute', () => {
     });
 
     renderProtectedRoute();
-    
+
     // Look for the loading spinner by class - the component uses a large spinner
-    const spinner = document.querySelector('.animate-spin');
+    const spinner = document.querySelector(".animate-spin");
     expect(spinner).toBeInTheDocument();
-    expect(spinner).toHaveClass('h-32', 'w-32');
+    expect(spinner).toHaveClass("h-32", "w-32");
   });
 
-  it('should render children when user is authenticated', () => {
+  it("should render children when user is authenticated", () => {
     mockUseAuth.mockReturnValue({
       isAuthenticated: true,
       isLoading: false,
-      user: { id: '1', name: 'Test User', email: 'test@example.com' },
-      token: 'test-token',
+      user: { id: "1", name: "Test User", email: "test@example.com" },
+      token: "test-token",
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
     });
 
     renderProtectedRoute();
-    
-    expect(screen.getByText('Protected Content')).toBeInTheDocument();
+
+    expect(screen.getByText("Protected Content")).toBeInTheDocument();
   });
 
-  it('should redirect to login when user is not authenticated', () => {
+  it("should redirect to login when user is not authenticated", () => {
     mockUseAuth.mockReturnValue({
       isAuthenticated: false,
       isLoading: false,
@@ -101,12 +101,12 @@ describe('ProtectedRoute', () => {
     });
 
     renderProtectedRoute();
-    
+
     // Check that protected content is not rendered when not authenticated
-    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+    expect(screen.queryByText("Protected Content")).not.toBeInTheDocument();
   });
 
-  it('should redirect to custom path when specified', () => {
+  it("should redirect to custom path when specified", () => {
     mockUseAuth.mockReturnValue({
       isAuthenticated: false,
       isLoading: false,
@@ -132,10 +132,10 @@ describe('ProtectedRoute', () => {
             }
           />
         </Routes>
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // Check that protected content is not rendered when not authenticated
-    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+    expect(screen.queryByText("Protected Content")).not.toBeInTheDocument();
   });
 });
