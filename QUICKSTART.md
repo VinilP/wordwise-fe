@@ -4,19 +4,53 @@ A modern React-based web application for the WordWise book review platform with 
 
 ## 🚀 Quick Start
 
+### Prerequisites
+- **Node.js** (v18 or higher)
+- **Backend API** running on `http://localhost:3001`
+- **npm** or **yarn** package manager
+
+### Setup Steps
+
 ```bash
-# Install dependencies
+# 1. Install dependencies
 npm install
 
-# Setup environment
+# 2. Setup environment
 cp .env.example .env
-# Edit .env with your configuration
+# Edit .env with your API configuration
 
-# Start development server
+# 3. Start development server
 npm run dev
 ```
 
-The application will be available at `http://localhost:3000`
+**Access Points:**
+- **Frontend**: `http://localhost:5173`
+- **Backend API**: `http://localhost:3001` (must be running)
+
+> 📖 **For detailed setup instructions, see [SETUP.md](./SETUP.md)**
+
+## 🚀 Running Full Development Environment
+
+To run both frontend and backend together:
+
+### Terminal 1 - Backend
+```bash
+cd wordwise-be
+npm run dev
+# Backend will run on http://localhost:3001
+```
+
+### Terminal 2 - Frontend
+```bash
+cd wordwise-fe
+npm run dev
+# Frontend will run on http://localhost:5173
+```
+
+### Quick Verification
+1. **Backend Health Check**: Visit `http://localhost:3001/health`
+2. **Frontend Application**: Visit `http://localhost:5173`
+3. **API Integration**: The frontend should connect to the backend automatically
 
 ## 📁 Project Structure
 
