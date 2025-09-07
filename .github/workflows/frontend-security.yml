@@ -1,0 +1,138 @@
+name: Frontend Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'frontend/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'frontend/**'
+  schedule:
+    # Run security scan daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  FRONTEND_DIR: './frontend'
+
+jobs:
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.FRONTEND_DIR }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.FRONTEND_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: |
+          echo "## 🔒 Security Audit Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          npm audit --audit-level=moderate --json > audit-results.json || true
+          
+          # Parse audit results
+          if [ -f audit-results.json ]; then
+            VULNERABILITIES=$(jq '.vulnerabilities | length' audit-results.json)
+            echo "Found $VULNERABILITIES vulnerabilities" >> $GITHUB_STEP_SUMMARY
+            
+            if [ $VULNERABILITIES -gt 0 ]; then
+              echo "### High/Critical Vulnerabilities" >> $GITHUB_STEP_SUMMARY
+              jq -r '.vulnerabilities | to_entries[] | select(.value.severity == "high" or .value.severity == "critical") | "- \(.key): \(.value.severity) - \(.value.title)"' audit-results.json >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        with:
+          args: --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+      - name: Check for secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      - name: Dependency vulnerability check
+        run: |
+          # Check for known vulnerable packages
+          npx audit-ci --config .audit-ci.json --output-format json > dependency-audit.json || true
+          
+          if [ -f dependency-audit.json ]; then
+            echo "### Dependency Audit Results" >> $GITHUB_STEP_SUMMARY
+            cat dependency-audit.json >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            ${{ env.FRONTEND_DIR }}/audit-results.json
+            ${{ env.FRONTEND_DIR }}/dependency-audit.json
+          retention-days: 30
+
+  license-check:
+    name: License Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.FRONTEND_DIR }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.FRONTEND_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check licenses
+        run: |
+          npx license-checker --summary
+          npx license-checker --json > licenses.json
+          
+          echo "## 📄 License Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### License Summary" >> $GITHUB_STEP_SUMMARY
+          npx license-checker --summary >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload license report
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report
+          path: ${{ env.FRONTEND_DIR }}/licenses.json
+          retention-days: 30

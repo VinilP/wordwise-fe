@@ -1,0 +1,92 @@
+name: Frontend PR Validation
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-*.yml'
+
+env:
+  NODE_VERSION: '20'
+  FRONTEND_DIR: './frontend'
+
+jobs:
+  # Quick validation for PRs
+  pr-validation:
+    name: PR Validation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.FRONTEND_DIR }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.FRONTEND_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Check Prettier formatting
+        run: npm run format:check
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Run integration tests
+        run: npm run test:integration
+
+      - name: Run accessibility tests
+        run: npm run test:accessibility
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Comment PR with build info
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Get build size
+            const distPath = path.join('${{ env.FRONTEND_DIR }}', 'dist');
+            const buildSize = fs.readdirSync(distPath).reduce((total, file) => {
+              const filePath = path.join(distPath, file);
+              const stats = fs.statSync(filePath);
+              return total + (stats.isDirectory() ? 0 : stats.size);
+            }, 0);
+            
+            const buildSizeKB = Math.round(buildSize / 1024);
+            
+            // Create comment
+            const comment = `## 🚀 Frontend Build Validation
+            
+            ✅ **Build Status**: Success
+            📦 **Build Size**: ${buildSizeKB} KB
+            🧪 **Tests**: All passed
+            🔍 **Linting**: Passed
+            📝 **Type Check**: Passed
+            
+            This PR is ready for review! 🎉`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

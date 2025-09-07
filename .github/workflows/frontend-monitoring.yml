@@ -1,0 +1,186 @@
+name: Frontend Monitoring
+
+on:
+  schedule:
+    # Run every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  FRONTEND_DIR: './frontend'
+
+jobs:
+  uptime-monitoring:
+    name: Uptime Monitoring
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check staging uptime
+        run: |
+          echo "## 🔍 Uptime Monitoring Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Staging Environment" >> $GITHUB_STEP_SUMMARY
+          
+          if curl -f -s -o /dev/null -w "%{http_code}" "https://${{ secrets.STAGING_DOMAIN }}" | grep -q "200"; then
+            echo "✅ Staging is UP" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Staging is DOWN" >> $GITHUB_STEP_SUMMARY
+            echo "::error::Staging environment is not responding"
+          fi
+
+      - name: Check production uptime
+        run: |
+          echo "### Production Environment" >> $GITHUB_STEP_SUMMARY
+          
+          if curl -f -s -o /dev/null -w "%{http_code}" "https://${{ secrets.PRODUCTION_DOMAIN }}" | grep -q "200"; then
+            echo "✅ Production is UP" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Production is DOWN" >> $GITHUB_STEP_SUMMARY
+            echo "::error::Production environment is not responding"
+          fi
+
+      - name: Response time check
+        run: |
+          echo "### Response Times" >> $GITHUB_STEP_SUMMARY
+          
+          # Check staging response time
+          STAGING_TIME=$(curl -o /dev/null -s -w "%{time_total}" "https://${{ secrets.STAGING_DOMAIN }}")
+          echo "Staging: ${STAGING_TIME}s" >> $GITHUB_STEP_SUMMARY
+          
+          # Check production response time
+          PROD_TIME=$(curl -o /dev/null -s -w "%{time_total}" "https://${{ secrets.PRODUCTION_DOMAIN }}")
+          echo "Production: ${PROD_TIME}s" >> $GITHUB_STEP_SUMMARY
+          
+          # Alert if response time is too high
+          if (( $(echo "$STAGING_TIME > 5.0" | bc -l) )); then
+            echo "::warning::Staging response time is high: ${STAGING_TIME}s"
+          fi
+          
+          if (( $(echo "$PROD_TIME > 5.0" | bc -l) )); then
+            echo "::warning::Production response time is high: ${PROD_TIME}s"
+          fi
+
+  performance-monitoring:
+    name: Performance Monitoring
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.FRONTEND_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Analyze bundle size
+        run: |
+          echo "## 📊 Performance Monitoring Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Bundle Size Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          BUNDLE_SIZE=$(du -s dist/ | cut -f1)
+          BUNDLE_SIZE_MB=$((BUNDLE_SIZE / 1024))
+          
+          echo "Total bundle size: ${BUNDLE_SIZE_MB}MB" >> $GITHUB_STEP_SUMMARY
+          
+          if [ $BUNDLE_SIZE_MB -gt 50 ]; then
+            echo "::warning::Bundle size is large: ${BUNDLE_SIZE_MB}MB"
+          fi
+          
+          echo "### Largest Files" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          find dist/ -type f -exec du -h {} + | sort -rh | head -10 >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Run Lighthouse audit
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          configPath: './frontend/.lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  security-monitoring:
+    name: Security Monitoring
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.FRONTEND_DIR }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.FRONTEND_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for vulnerabilities
+        run: |
+          echo "## 🔒 Security Monitoring Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Run npm audit
+          npm audit --audit-level=moderate --json > audit-results.json || true
+          
+          if [ -f audit-results.json ]; then
+            VULNERABILITIES=$(jq '.vulnerabilities | length' audit-results.json)
+            echo "Found $VULNERABILITIES vulnerabilities" >> $GITHUB_STEP_SUMMARY
+            
+            if [ $VULNERABILITIES -gt 0 ]; then
+              echo "::warning::Found $VULNERABILITIES vulnerabilities"
+              
+              # Check for high/critical vulnerabilities
+              HIGH_CRITICAL=$(jq -r '.vulnerabilities | to_entries[] | select(.value.severity == "high" or .value.severity == "critical") | .key' audit-results.json | wc -l)
+              
+              if [ $HIGH_CRITICAL -gt 0 ]; then
+                echo "::error::Found $HIGH_CRITICAL high/critical vulnerabilities"
+                echo "### High/Critical Vulnerabilities" >> $GITHUB_STEP_SUMMARY
+                jq -r '.vulnerabilities | to_entries[] | select(.value.severity == "high" or .value.severity == "critical") | "- \(.key): \(.value.severity) - \(.value.title)"' audit-results.json >> $GITHUB_STEP_SUMMARY
+              fi
+            else
+              echo "✅ No vulnerabilities found" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+  send-alerts:
+    name: Send Alerts
+    runs-on: ubuntu-latest
+    needs: [uptime-monitoring, performance-monitoring, security-monitoring]
+    if: always()
+    steps:
+      - name: Check for failures
+        id: check-failures
+        run: |
+          if [ "${{ needs.uptime-monitoring.result }}" = "failure" ] || [ "${{ needs.performance-monitoring.result }}" = "failure" ] || [ "${{ needs.security-monitoring.result }}" = "failure" ]; then
+            echo "has-failures=true" >> $GITHUB_OUTPUT
+          else
+            echo "has-failures=false" >> $GITHUB_OUTPUT
+          fi
+
+
+      - name: Send Slack notification
+        if: steps.check-failures.outputs.has-failures == 'true' && vars.SLACK_WEBHOOK_URL != ''
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"🚨 Frontend Monitoring Alert\\n\\nOne or more monitoring checks have failed. Please check the GitHub Actions logs for details.\"}" \
+            "${{ secrets.SLACK_WEBHOOK_URL }}"
+
+      - name: Send email notification
+        if: steps.check-failures.outputs.has-failures == 'true' && vars.EMAIL_NOTIFICATION != ''
+        run: |
+          echo "Sending email notification for monitoring failures"
+          # Add email notification logic here if needed

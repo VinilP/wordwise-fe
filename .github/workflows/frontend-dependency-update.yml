@@ -1,0 +1,80 @@
+name: Frontend Dependency Update
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  FRONTEND_DIR: './frontend'
+
+jobs:
+  update-dependencies:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.FRONTEND_DIR }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.FRONTEND_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update dependencies
+        run: |
+          npm update
+          npm audit fix --audit-level=moderate
+
+      - name: Check for updates
+        id: check-updates
+        run: |
+          if git diff --quiet package-lock.json; then
+            echo "no-updates=true" >> $GITHUB_OUTPUT
+          else
+            echo "no-updates=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run tests after update
+        if: steps.check-updates.outputs.no-updates == 'false'
+        run: |
+          npm run lint
+          npm run test:unit
+          npm run build
+
+      - name: Create Pull Request
+        if: steps.check-updates.outputs.no-updates == 'false'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(frontend): update dependencies'
+          title: 'chore(frontend): update dependencies'
+          body: |
+            ## 🔄 Dependency Updates
+            
+            This PR contains automatic dependency updates for the frontend.
+            
+            ### Changes
+            - Updated npm dependencies to latest compatible versions
+            - Applied security fixes where possible
+            
+            ### Testing
+            - [x] Linting passed
+            - [x] Unit tests passed
+            - [x] Build successful
+            
+            Please review and merge if everything looks good.
+          branch: dependency-update/frontend
+          delete-branch: true

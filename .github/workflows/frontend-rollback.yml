@@ -1,0 +1,160 @@
+name: Frontend Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to rollback'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      rollback_to:
+        description: 'Rollback to specific commit (leave empty for previous deployment)'
+        required: false
+        type: string
+
+env:
+  NODE_VERSION: '20'
+  FRONTEND_DIR: './frontend'
+  AWS_REGION: 'us-east-1'
+
+jobs:
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    defaults:
+      run:
+        working-directory: ${{ env.FRONTEND_DIR }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine rollback target
+        id: rollback-target
+        run: |
+          if [ -n "${{ github.event.inputs.rollback_to }}" ]; then
+            echo "target=${{ github.event.inputs.rollback_to }}" >> $GITHUB_OUTPUT
+            echo "type=commit" >> $GITHUB_OUTPUT
+          else
+            # Get the previous commit
+            PREVIOUS_COMMIT=$(git log --oneline -n 2 | tail -1 | cut -d' ' -f1)
+            echo "target=$PREVIOUS_COMMIT" >> $GITHUB_OUTPUT
+            echo "type=previous" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout rollback target
+        run: |
+          git checkout ${{ steps.rollback-target.outputs.target }}
+          echo "Rolling back to: $(git log --oneline -n 1)"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.FRONTEND_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy rollback
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "staging" ]; then
+            S3_BUCKET="${{ secrets.STAGING_S3_BUCKET }}"
+            CLOUDFRONT_ID="${{ secrets.STAGING_CLOUDFRONT_DISTRIBUTION_ID }}"
+            DOMAIN="${{ secrets.STAGING_DOMAIN }}"
+          else
+            S3_BUCKET="${{ secrets.PRODUCTION_S3_BUCKET }}"
+            CLOUDFRONT_ID="${{ secrets.PRODUCTION_CLOUDFRONT_DISTRIBUTION_ID }}"
+            DOMAIN="${{ secrets.PRODUCTION_DOMAIN }}"
+          fi
+          
+          echo "🔄 Rolling back to: ${{ steps.rollback-target.outputs.target }}"
+          echo "🌐 Environment: ${{ github.event.inputs.environment }}"
+          echo "🪣 S3 Bucket: $S3_BUCKET"
+          
+          # Deploy to S3
+          aws s3 sync dist/ s3://$S3_BUCKET --delete
+          aws s3 cp dist/index.html s3://$S3_BUCKET/index.html --cache-control "no-cache"
+          
+          # Invalidate CloudFront
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id $CLOUDFRONT_ID \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+          
+          echo "🆔 Invalidation ID: $INVALIDATION_ID"
+
+      - name: Wait for CloudFront invalidation
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "staging" ]; then
+            CLOUDFRONT_ID="${{ secrets.STAGING_CLOUDFRONT_DISTRIBUTION_ID }}"
+          else
+            CLOUDFRONT_ID="${{ secrets.PRODUCTION_CLOUDFRONT_DISTRIBUTION_ID }}"
+          fi
+          
+          aws cloudfront wait invalidation-completed \
+            --distribution-id $CLOUDFRONT_ID \
+            --id $INVALIDATION_ID
+
+      - name: Health check after rollback
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "staging" ]; then
+            DOMAIN="${{ secrets.STAGING_DOMAIN }}"
+          else
+            DOMAIN="${{ secrets.PRODUCTION_DOMAIN }}"
+          fi
+          
+          echo "🔍 Performing health check..."
+          MAX_RETRIES=10
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if curl -f -s "https://$DOMAIN" > /dev/null; then
+              echo "✅ Health check passed!"
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "⏳ Health check failed, retrying... ($RETRY_COUNT/$MAX_RETRIES)"
+              sleep 10
+            fi
+          done
+          
+          if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+            echo "❌ Health check failed after $MAX_RETRIES attempts"
+            exit 1
+          fi
+
+      - name: Rollback summary
+        run: |
+          echo "## 🔄 Rollback Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Rollback Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target**: ${{ steps.rollback-target.outputs.target }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Type**: ${{ steps.rollback-target.outputs.type }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ✅ Success" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Verify the application is working correctly" >> $GITHUB_STEP_SUMMARY
+          echo "2. Investigate the issue that caused the rollback" >> $GITHUB_STEP_SUMMARY
+          echo "3. Fix the issue and prepare a new deployment" >> $GITHUB_STEP_SUMMARY

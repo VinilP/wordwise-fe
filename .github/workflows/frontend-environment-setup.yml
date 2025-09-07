@@ -1,0 +1,201 @@
+name: Frontend Environment Setup
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to setup'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+        - both
+
+env:
+  NODE_VERSION: '20'
+  FRONTEND_DIR: './frontend'
+
+jobs:
+  validate-environment:
+    name: Validate Environment Configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate required secrets
+        run: |
+          echo "## 🔍 Environment Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check AWS credentials
+          if [ -n "${{ secrets.AWS_ACCESS_KEY_ID }}" ] && [ -n "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
+            echo "✅ AWS credentials configured" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ AWS credentials missing" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          
+          # Check staging environment
+          if [ "${{ github.event.inputs.environment }}" = "staging" ] || [ "${{ github.event.inputs.environment }}" = "both" ]; then
+            if [ -n "${{ secrets.STAGING_S3_BUCKET }}" ] && [ -n "${{ secrets.STAGING_CLOUDFRONT_DISTRIBUTION_ID }}" ] && [ -n "${{ secrets.STAGING_DOMAIN }}" ]; then
+              echo "✅ Staging environment configured" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ Staging environment configuration incomplete" >> $GITHUB_STEP_SUMMARY
+              exit 1
+            fi
+          fi
+          
+          # Check production environment
+          if [ "${{ github.event.inputs.environment }}" = "production" ] || [ "${{ github.event.inputs.environment }}" = "both" ]; then
+            if [ -n "${{ secrets.PRODUCTION_S3_BUCKET }}" ] && [ -n "${{ secrets.PRODUCTION_CLOUDFRONT_DISTRIBUTION_ID }}" ] && [ -n "${{ secrets.PRODUCTION_DOMAIN }}" ]; then
+              echo "✅ Production environment configured" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ Production environment configuration incomplete" >> $GITHUB_STEP_SUMMARY
+              exit 1
+            fi
+          fi
+
+      - name: Test AWS connectivity
+        run: |
+          echo "## 🔗 AWS Connectivity Test" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Configure AWS credentials
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set default.region us-east-1
+          
+          # Test S3 access
+          if [ "${{ github.event.inputs.environment }}" = "staging" ] || [ "${{ github.event.inputs.environment }}" = "both" ]; then
+            if aws s3 ls s3://${{ secrets.STAGING_S3_BUCKET }}/ > /dev/null 2>&1; then
+              echo "✅ Staging S3 bucket accessible" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ Staging S3 bucket not accessible" >> $GITHUB_STEP_SUMMARY
+              exit 1
+            fi
+          fi
+          
+          if [ "${{ github.event.inputs.environment }}" = "production" ] || [ "${{ github.event.inputs.environment }}" = "both" ]; then
+            if aws s3 ls s3://${{ secrets.PRODUCTION_S3_BUCKET }}/ > /dev/null 2>&1; then
+              echo "✅ Production S3 bucket accessible" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ Production S3 bucket not accessible" >> $GITHUB_STEP_SUMMARY
+              exit 1
+            fi
+          fi
+
+      - name: Test CloudFront access
+        run: |
+          echo "## ☁️ CloudFront Access Test" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ github.event.inputs.environment }}" = "staging" ] || [ "${{ github.event.inputs.environment }}" = "both" ]; then
+            if aws cloudfront get-distribution --id ${{ secrets.STAGING_CLOUDFRONT_DISTRIBUTION_ID }} > /dev/null 2>&1; then
+              echo "✅ Staging CloudFront distribution accessible" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ Staging CloudFront distribution not accessible" >> $GITHUB_STEP_SUMMARY
+              exit 1
+            fi
+          fi
+          
+          if [ "${{ github.event.inputs.environment }}" = "production" ] || [ "${{ github.event.inputs.environment }}" = "both" ]; then
+            if aws cloudfront get-distribution --id ${{ secrets.PRODUCTION_CLOUDFRONT_DISTRIBUTION_ID }} > /dev/null 2>&1; then
+              echo "✅ Production CloudFront distribution accessible" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ Production CloudFront distribution not accessible" >> $GITHUB_STEP_SUMMARY
+              exit 1
+            fi
+          fi
+
+  setup-s3-buckets:
+    name: Setup S3 Buckets
+    runs-on: ubuntu-latest
+    needs: validate-environment
+    if: github.event.inputs.environment == 'both'
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Create S3 buckets if they don't exist
+        run: |
+          # Create staging bucket
+          aws s3 mb s3://${{ secrets.STAGING_S3_BUCKET }} --region us-east-1 || echo "Staging bucket already exists"
+          
+          # Create production bucket
+          aws s3 mb s3://${{ secrets.PRODUCTION_S3_BUCKET }} --region us-east-1 || echo "Production bucket already exists"
+          
+          # Configure bucket policies for static website hosting
+          aws s3 website s3://${{ secrets.STAGING_S3_BUCKET }} --index-document index.html --error-document index.html
+          aws s3 website s3://${{ secrets.PRODUCTION_S3_BUCKET }} --index-document index.html --error-document index.html
+
+      - name: Configure CORS
+        run: |
+          # CORS configuration for S3 buckets
+          cat > cors-config.json << EOF
+          {
+            "CORSRules": [
+              {
+                "AllowedOrigins": ["*"],
+                "AllowedMethods": ["GET", "HEAD"],
+                "AllowedHeaders": ["*"],
+                "MaxAgeSeconds": 3000
+              }
+            ]
+          }
+          EOF
+          
+          aws s3api put-bucket-cors --bucket ${{ secrets.STAGING_S3_BUCKET }} --cors-configuration file://cors-config.json
+          aws s3api put-bucket-cors --bucket ${{ secrets.PRODUCTION_S3_BUCKET }} --cors-configuration file://cors-config.json
+
+  test-deployment:
+    name: Test Deployment
+    runs-on: ubuntu-latest
+    needs: [validate-environment, setup-s3-buckets]
+    if: always() && needs.validate-environment.result == 'success'
+    defaults:
+      run:
+        working-directory: ${{ env.FRONTEND_DIR }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.FRONTEND_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Test deployment script
+        run: |
+          # Test the deployment script syntax
+          bash -n scripts/deploy.sh
+          echo "✅ Deployment script syntax is valid"
+
+      - name: Environment setup complete
+        run: |
+          echo "## 🎉 Environment Setup Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Verify all secrets are configured correctly" >> $GITHUB_STEP_SUMMARY
+          echo "2. Test the deployment pipeline with a small change" >> $GITHUB_STEP_SUMMARY
+          echo "3. Monitor the first deployment for any issues" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Available Workflows:" >> $GITHUB_STEP_SUMMARY
+          echo "- **frontend-ci-cd.yml**: Main deployment pipeline" >> $GITHUB_STEP_SUMMARY
+          echo "- **frontend-pr-validation.yml**: PR validation" >> $GITHUB_STEP_SUMMARY
+          echo "- **frontend-performance.yml**: Performance monitoring" >> $GITHUB_STEP_SUMMARY
+          echo "- **frontend-security.yml**: Security scanning" >> $GITHUB_STEP_SUMMARY
